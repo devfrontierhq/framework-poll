@@ -1,6 +1,6 @@
 ## 1. 專案初始化與基礎設定
 
-- [ ] 1.1 使用 Vite 建立 React TypeScript 專案
+- [x] 1.1 使用 Vite 建立 React TypeScript 專案
 - [ ] 1.2 安裝 Tailwind CSS 並設定配置檔
 - [ ] 1.3 安裝 shadcn/ui 元件庫
 - [ ] 1.4 安裝 Zustand 狀態管理函式庫
