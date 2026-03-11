@@ -8,7 +8,7 @@
 - [x] 1.6 建立 .env 檔案並設定 VITE_ADMIN_SECRET 環境變數
 - [x] 1.7 安裝並設定 ESLint、Prettier 與 Husky（TypeScript + React 規則 + pre-commit hooks）
 - [x] 1.8 安裝 Vitest 與 React Testing Library
-- [ ] 1.9 安裝 React Compiler 與 vite-plugin-babel 實作自動效能最佳化
+- [x] 1.9 安裝 React Compiler 與 vite-plugin-babel 實作自動效能最佳化
 
 ## 2. 型別定義與工具函式
 
