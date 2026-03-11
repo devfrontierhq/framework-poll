@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+
 function App() {
   return (
     <main className="min-h-screen bg-linear-to-br from-slate-950 via-cyan-950 to-emerald-950 px-6 py-16 text-white">
@@ -15,12 +17,15 @@ function App() {
             obvious immediately.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <button className="rounded-full bg-cyan-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-400/30 transition hover:-translate-y-0.5 hover:bg-cyan-200">
+            <Button className="rounded-full bg-cyan-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-400/30 hover:bg-cyan-200">
               Primary Action
-            </button>
-            <button className="rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15">
+            </Button>
+            <Button
+              variant="outline"
+              className="rounded-full border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15"
+            >
               Secondary Action
-            </button>
+            </Button>
           </div>
         </section>
 
