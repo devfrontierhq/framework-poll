@@ -31,22 +31,26 @@ function App() {
 
         <section className="grid gap-4 md:grid-cols-3">
           <article className="rounded-2xl bg-amber-300 p-6 text-slate-950 shadow-lg">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em]">
+            <p className="text-sm font-semibold tracking-[0.2em] uppercase">
               Color
             </p>
-            <p className="mt-3 text-2xl font-black">Solid utility backgrounds</p>
+            <p className="mt-3 text-2xl font-black">
+              Solid utility backgrounds
+            </p>
           </article>
           <article className="rounded-2xl bg-fuchsia-500 p-6 text-white shadow-lg">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em]">
+            <p className="text-sm font-semibold tracking-[0.2em] uppercase">
               Layout
             </p>
             <p className="mt-3 text-2xl font-black">Responsive grid columns</p>
           </article>
           <article className="rounded-2xl border border-emerald-200/30 bg-emerald-400/20 p-6 text-white shadow-lg">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em]">
+            <p className="text-sm font-semibold tracking-[0.2em] uppercase">
               Effects
             </p>
-            <p className="mt-3 text-2xl font-black">Blur, opacity, and shadows</p>
+            <p className="mt-3 text-2xl font-black">
+              Blur, opacity, and shadows
+            </p>
           </article>
         </section>
       </div>

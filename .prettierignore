@@ -1,0 +1,14 @@
+dist
+node_modules
+coverage
+.husky
+.spectra
+.agent
+.agents
+.claude
+.gemini
+.kilocode
+openspec
+README.md
+pnpm-lock.yaml
+openspec/.vector-search.db
