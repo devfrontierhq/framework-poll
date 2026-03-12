@@ -18,7 +18,7 @@
 - [x] 2.4 建立 utils/csv.ts 實作 date formatting：CSV 日期格式化函式（使用 date-fns date formatting library）
 - [x] 2.5 在 utils/csv.ts 實作 buildCsvRows 函式建立 CSV 資料，確保 dot name in export 與 category name resolution
 - [x] 2.6 在 utils/csv.ts 實作 downloadCsv 函式下載 UTF-8 with BOM 編碼的 CSV file format，確保 no data loss
-- [ ] 2.7 建立 test/builders.ts 實作測試資料工廠函式
+- [x] 2.7 建立 test/builders.ts 實作測試資料工廠函式
 
 ## 3. IndexedDB 資料持久化
 
