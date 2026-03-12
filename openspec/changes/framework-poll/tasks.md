@@ -12,7 +12,7 @@
 
 ## 2. 型別定義與工具函式
 
-- [ ] 2.1 建立 types/dotBoard.ts 定義 Category data model 與 Dot data model、CsvRow 型別
+- [x] 2.1 建立 types/dotBoard.ts 定義 Category data model 與 Dot data model、CsvRow 型別
 - [ ] 2.2 建立 utils/id.ts 實作 createId 函式產生唯一 ID
 - [ ] 2.3 建立 utils/env.ts 實作 password storage：讀取 VITE_ADMIN_SECRET 的函式
 - [ ] 2.4 建立 utils/csv.ts 實作 date formatting：CSV 日期格式化函式（使用 date-fns date formatting library）
