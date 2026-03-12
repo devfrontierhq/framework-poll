@@ -1,4 +1,4 @@
-<!-- SPECTRA:START v1.0.0 -->
+<!-- SPECTRA:START v1.0.1 -->
 Create a complete OpenSpec change proposal — from requirement to validated artifacts — in a single workflow.
 
 **Input**: The argument after `/spectra:propose` is the requirement description. Examples:
