@@ -14,7 +14,7 @@
 
 - [x] 2.1 建立 types/dotBoard.ts 定義 Category data model 與 Dot data model、CsvRow 型別
 - [x] 2.2 建立 utils/id.ts 實作 createId 函式產生唯一 ID
-- [ ] 2.3 建立 utils/env.ts 實作 password storage：讀取 VITE_ADMIN_SECRET 的函式
+- [x] 2.3 建立 utils/env.ts 實作 password storage：讀取 VITE_ADMIN_SECRET 的函式
 - [ ] 2.4 建立 utils/csv.ts 實作 date formatting：CSV 日期格式化函式（使用 date-fns date formatting library）
 - [ ] 2.5 在 utils/csv.ts 實作 buildCsvRows 函式建立 CSV 資料，確保 dot name in export 與 category name resolution
 - [ ] 2.6 在 utils/csv.ts 實作 downloadCsv 函式下載 UTF-8 with BOM 編碼的 CSV file format，確保 no data loss
