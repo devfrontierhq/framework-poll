@@ -27,7 +27,7 @@
 - [x] 3.3 建立 dots store 並加入 categoryId、deletedAt 索引
 - [x] 3.4 建立 dots store 的 [categoryId, isDeleted] 複合索引用於 query optimization
 - [x] 3.5 實作 Category CRUD 函式（create category, read, update, soft delete implementation）實作 timestamp format with ISO strings
-- [ ] 3.6 實作 Dot CRUD 函式（create, read, update, soft delete implementation）store dot position with xRatio/yRatio
+- [x] 3.6 實作 Dot CRUD 函式（create, read, update, soft delete implementation）store dot position with xRatio/yRatio
 - [ ] 3.7 實作 cascade delete：刪除 category 時連動軟刪除所有 dots
 - [ ] 3.8 實作查詢函式：使用 IndexedDB 複合索引查詢特定 category 的未刪除 dots 實作 immediate persistence
 

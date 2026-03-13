@@ -6,7 +6,7 @@ import {
 } from 'idb'
 
 import type { Category, Dot } from '@/types/dotBoard'
-import { isValidHexColor } from '@/types/dotBoard'
+import { isValidCoordinates, isValidHexColor } from '@/types/dotBoard'
 import { createId } from '@/utils/id'
 
 export const DB_NAME = 'framework-poll-db'
@@ -53,6 +53,11 @@ export type DotBoardDB = DBSchema & {
 
 export type CreateCategoryInput = Pick<Category, 'title' | 'color'>
 export type UpdateCategoryInput = Partial<Pick<Category, 'title' | 'color'>>
+export type CreateDotInput = Pick<
+  Dot,
+  'categoryId' | 'name' | 'xRatio' | 'yRatio'
+>
+export type UpdateDotInput = Partial<Pick<Dot, 'name' | 'xRatio' | 'yRatio'>>
 
 let dbPromise: Promise<IDBPDatabase<DotBoardDB>> | null = null
 
@@ -64,6 +69,14 @@ type UpgradeTransaction = IDBPTransaction<
 
 function getTimestamp() {
   return new Date().toISOString()
+}
+
+function omitUndefinedFields<T extends object>(
+  updates: Partial<T>,
+): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(updates).filter(([, value]) => value !== undefined),
+  ) as Partial<T>
 }
 
 function getDb() {
@@ -192,6 +205,7 @@ export async function updateCategory(
   const database = await getDb()
   const transaction = database.transaction(STORE_NAMES.categories, 'readwrite')
   const categoriesStore = transaction.objectStore(STORE_NAMES.categories)
+  const sanitizedUpdates = omitUndefinedFields<Category>(updates)
   const category = await categoriesStore.get(categoryId)
 
   if (!category) {
@@ -200,15 +214,18 @@ export async function updateCategory(
   }
 
   // Validate hex color format if color is being updated
-  if (updates.color !== undefined && !isValidHexColor(updates.color)) {
+  if (
+    sanitizedUpdates.color !== undefined &&
+    !isValidHexColor(sanitizedUpdates.color)
+  ) {
     throw new Error(
-      `Invalid color format: ${updates.color}. Must be hex format (#RRGGBB).`,
+      `Invalid color format: ${sanitizedUpdates.color}. Must be hex format (#RRGGBB).`,
     )
   }
 
   const nextCategory: Category = {
     ...category,
-    ...updates,
+    ...sanitizedUpdates,
   }
 
   await categoriesStore.put(nextCategory)
@@ -235,4 +252,122 @@ export async function softDeleteCategory(categoryId: Category['id']) {
   await database.put(STORE_NAMES.categories, nextCategory)
 
   return nextCategory
+}
+
+export async function createDot(input: CreateDotInput): Promise<Dot> {
+  // Validate coordinates before persisting
+  if (!isValidCoordinates(input.xRatio, input.yRatio)) {
+    throw new Error(
+      `Invalid dot coordinates: xRatio=${input.xRatio}, yRatio=${input.yRatio}. Both must be in [0, 1].`,
+    )
+  }
+
+  const database = await getDb()
+  const transaction = database.transaction(
+    [STORE_NAMES.categories, STORE_NAMES.dots],
+    'readwrite',
+  )
+  const categoriesStore = transaction.objectStore(STORE_NAMES.categories)
+  const dotsStore = transaction.objectStore(STORE_NAMES.dots)
+  const category = await categoriesStore.get(input.categoryId)
+
+  if (!category) {
+    await transaction.done
+    throw new Error(
+      `Cannot create dot: category with id "${input.categoryId}" does not exist.`,
+    )
+  }
+  if (category.isDeleted === 1) {
+    await transaction.done
+    throw new Error(
+      `Cannot create dot: category "${category.title}" has been deleted.`,
+    )
+  }
+
+  const dot: Dot = {
+    id: createId(),
+    categoryId: input.categoryId,
+    name: input.name,
+    xRatio: input.xRatio,
+    yRatio: input.yRatio,
+    createdAt: getTimestamp(),
+    deletedAt: null,
+    isDeleted: 0,
+  }
+
+  await dotsStore.add(dot)
+  await transaction.done
+
+  return dot
+}
+
+export async function getDot(dotId: Dot['id']) {
+  const database = await getDb()
+  return database.get(STORE_NAMES.dots, dotId)
+}
+
+export async function getDots() {
+  const database = await getDb()
+  return database.getAll(STORE_NAMES.dots)
+}
+
+export async function updateDot(dotId: Dot['id'], updates: UpdateDotInput) {
+  const database = await getDb()
+  const transaction = database.transaction(STORE_NAMES.dots, 'readwrite')
+  const dotsStore = transaction.objectStore(STORE_NAMES.dots)
+  const sanitizedUpdates = omitUndefinedFields<Dot>(updates)
+  const dot = await dotsStore.get(dotId)
+
+  if (!dot) {
+    await transaction.done
+    return undefined
+  }
+
+  // Avoid reviving a dot that was already soft-deleted.
+  if (dot.isDeleted === 1) {
+    await transaction.done
+    return dot
+  }
+
+  const nextDot: Dot = {
+    ...dot,
+    ...sanitizedUpdates,
+  }
+
+  // Validate coordinates if either xRatio or yRatio is being updated
+  if (
+    sanitizedUpdates.xRatio !== undefined ||
+    sanitizedUpdates.yRatio !== undefined
+  ) {
+    if (!isValidCoordinates(nextDot.xRatio, nextDot.yRatio)) {
+      throw new Error(
+        `Invalid dot coordinates: xRatio=${nextDot.xRatio}, yRatio=${nextDot.yRatio}. Both must be in [0, 1].`,
+      )
+    }
+  }
+
+  await dotsStore.put(nextDot)
+  await transaction.done
+
+  return nextDot
+}
+
+export async function softDeleteDot(dotId: Dot['id']) {
+  const database = await getDb()
+  const dot = await database.get(STORE_NAMES.dots, dotId)
+
+  if (!dot) {
+    return undefined
+  }
+
+  const deletedAt = getTimestamp()
+  const nextDot: Dot = {
+    ...dot,
+    deletedAt,
+    isDeleted: 1,
+  }
+
+  await database.put(STORE_NAMES.dots, nextDot)
+
+  return nextDot
 }
