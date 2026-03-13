@@ -10,10 +10,21 @@ export const STORE_NAMES = {
   dots: 'dots',
 } as const
 
+export const INDEX_NAMES = {
+  categories: {
+    deletedAt: 'deletedAt',
+    isDeleted: 'isDeleted',
+  },
+} as const
+
 export type DotBoardDB = DBSchema & {
   categories: {
     key: Category['id']
     value: Category
+    indexes: {
+      deletedAt: Category['deletedAt']
+      isDeleted: Category['isDeleted']
+    }
   }
   dots: {
     key: Dot['id']
@@ -31,10 +42,30 @@ function createStores(database: IDBPDatabase<DotBoardDB>) {
   }
 }
 
+function ensureCategoriesIndexes(database: IDBPDatabase<DotBoardDB>) {
+  const categoriesStore = database
+    .transaction(STORE_NAMES.categories, 'versionchange')
+    .objectStore(STORE_NAMES.categories)
+
+  if (!categoriesStore.indexNames.contains(INDEX_NAMES.categories.deletedAt)) {
+    categoriesStore.createIndex(
+      INDEX_NAMES.categories.deletedAt,
+      INDEX_NAMES.categories.deletedAt,
+    )
+  }
+  if (!categoriesStore.indexNames.contains(INDEX_NAMES.categories.isDeleted)) {
+    categoriesStore.createIndex(
+      INDEX_NAMES.categories.isDeleted,
+      INDEX_NAMES.categories.isDeleted,
+    )
+  }
+}
+
 export function initIndexedDb() {
   return openDB<DotBoardDB>(DB_NAME, DB_VERSION, {
     upgrade(database) {
       createStores(database)
+      ensureCategoriesIndexes(database)
     },
   })
 }
