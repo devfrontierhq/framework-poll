@@ -43,3 +43,8 @@ export function isDeleted<T extends { deletedAt: string | null }>(
 export function isValidCoordinates(xRatio: number, yRatio: number): boolean {
   return xRatio >= 0 && xRatio <= 1 && yRatio >= 0 && yRatio <= 1
 }
+
+/** 驗證顏色是否為有效的十六進位格 */
+export function isValidHexColor(color: string): boolean {
+  return /^#[0-9A-F]{6}$/i.test(color)
+}
