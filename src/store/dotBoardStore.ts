@@ -7,6 +7,8 @@ import {
   createCategory,
   updateCategory,
   softDeleteCategory,
+  createDot,
+  softDeleteDot,
 } from '@/db'
 import { getAdminSecret } from '@/utils/env'
 
@@ -26,6 +28,13 @@ export type DotBoardActions = {
     updates: { title?: string; color?: string },
   ) => Promise<Category | undefined>
   removeCategory: (categoryId: string) => Promise<Category | undefined>
+  addDot: (
+    categoryId: string,
+    name: string,
+    xRatio: number,
+    yRatio: number,
+  ) => Promise<Dot>
+  removeDot: (dotId: string) => Promise<Dot | undefined>
 }
 
 export type DotBoardStore = DotBoardState & DotBoardActions
@@ -118,5 +127,34 @@ export const useDotBoardStore = create<DotBoardStore>((set) => ({
     }
 
     return deletedCategory
+  },
+  addDot: async (
+    categoryId: string,
+    name: string,
+    xRatio: number,
+    yRatio: number,
+  ) => {
+    const dot = await createDot({ categoryId, name, xRatio, yRatio })
+
+    set((state) => {
+      const dots = new Map(state.dots)
+      dots.set(dot.id, dot)
+      return { dots }
+    })
+
+    return dot
+  },
+  removeDot: async (dotId: string) => {
+    const deletedDot = await softDeleteDot(dotId)
+
+    if (deletedDot) {
+      set((state) => {
+        const dots = new Map(state.dots)
+        dots.delete(dotId)
+        return { dots }
+      })
+    }
+
+    return deletedDot
   },
 }))

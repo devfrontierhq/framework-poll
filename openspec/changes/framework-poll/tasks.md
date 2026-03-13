@@ -41,8 +41,8 @@
 - [x] 4.6 實作 addCategory action create category（儲存至 IndexedDB）
 - [x] 4.7 實作 updateCategory action edit category 更新版塊標題與顏色實作 store category color
 - [x] 4.8 實作 softDeleteCategory action delete category 軟刪除版塊與連動刪除 dots
-- [ ] 4.9 實作 addDot action add dot by clicking（計算 xRatio/yRatio 並儲存）
-- [ ] 4.10 實作 softDeleteDot action delete dot 軟刪除圓點
+- [x] 4.9 實作 addDot action add dot by clicking（計算 xRatio/yRatio 並儲存）
+- [x] 4.10 實作 softDeleteDot action delete dot 軟刪除圓點
 - [ ] 4.11 實作 exportCsv action export to CSV 匯出 CSV 檔案實作 export all dots 與 include all records
 
 ## 5. 核心邏輯測試
