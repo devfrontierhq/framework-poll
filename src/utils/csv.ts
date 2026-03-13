@@ -2,6 +2,8 @@ import { format } from 'date-fns'
 
 import type { Category, CsvRow, Dot } from '@/types/dotBoard'
 
+const FORMULA_PREFIX_PATTERN = /^[=+\-@\t\r]/
+
 /**
  * 格式化日期時間為 CSV 格式 (yyyy-MM-dd HH:mm)
  * @param date ISO 8601 日期字串或 null
@@ -43,13 +45,25 @@ export function buildCsvRows(dots: Dot[], categories: Category[]): CsvRow[] {
 }
 
 /**
- * 跳脫 CSV 欄位（處理逗號、引號、換行）
+ * 跳脫 CSV 欄位（處理逗號、引號、換行、公式注入）
+ *
+ * Formula-like values are prefixed with an apostrophe before CSV escaping so
+ * spreadsheet apps render them as literal text instead of evaluating them.
  */
 function escapeCsvField(field: string): string {
-  if (field.includes(',') || field.includes('"') || field.includes('\n')) {
-    return `"${field.replace(/"/g, '""')}"`
+  const safeField = FORMULA_PREFIX_PATTERN.test(field) ? `'${field}` : field
+  const needsQuoting =
+    safeField.includes(',') || // CSV delimiter
+    safeField.includes('"') || // Quote character
+    safeField.includes('\n') || // Line feed
+    safeField.includes('\r') // Carriage return
+
+  if (needsQuoting) {
+    // Escape internal quotes by doubling them, then wrap entire field.
+    return `"${safeField.replace(/"/g, '""')}"`
   }
-  return field
+
+  return safeField
 }
 
 /**
