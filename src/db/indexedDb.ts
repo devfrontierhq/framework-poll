@@ -193,7 +193,16 @@ export async function getCategory(categoryId: Category['id']) {
   return database.get(STORE_NAMES.categories, categoryId)
 }
 
-export async function getCategories() {
+export async function getActiveCategories() {
+  const database = await getDb()
+  return database.getAllFromIndex(
+    STORE_NAMES.categories,
+    INDEX_NAMES.categories.isDeleted,
+    0,
+  )
+}
+
+export async function getAllCategories() {
   const database = await getDb()
   return database.getAll(STORE_NAMES.categories)
 }
@@ -331,9 +340,28 @@ export async function getDot(dotId: Dot['id']) {
   return database.get(STORE_NAMES.dots, dotId)
 }
 
-export async function getDots() {
+export async function getActiveDots() {
+  const database = await getDb()
+  return database.getAllFromIndex(
+    STORE_NAMES.dots,
+    INDEX_NAMES.dots.isDeleted,
+    0,
+  )
+}
+
+export async function getAllDots() {
   const database = await getDb()
   return database.getAll(STORE_NAMES.dots)
+}
+
+export async function getActiveDotsByCategory(categoryId: Dot['categoryId']) {
+  const database = await getDb()
+
+  return database.getAllFromIndex(
+    STORE_NAMES.dots,
+    INDEX_NAMES.dots.categoryIdIsDeleted,
+    [categoryId, 0],
+  )
 }
 
 export async function updateDot(dotId: Dot['id'], updates: UpdateDotInput) {
