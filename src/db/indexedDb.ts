@@ -236,9 +236,16 @@ export async function updateCategory(
 
 export async function softDeleteCategory(categoryId: Category['id']) {
   const database = await getDb()
-  const category = await database.get(STORE_NAMES.categories, categoryId)
+  const transaction = database.transaction(
+    [STORE_NAMES.categories, STORE_NAMES.dots],
+    'readwrite',
+  )
+  const categoriesStore = transaction.objectStore(STORE_NAMES.categories)
+  const dotsStore = transaction.objectStore(STORE_NAMES.dots)
+  const category = await categoriesStore.get(categoryId)
 
   if (!category) {
+    await transaction.done
     return undefined
   }
 
@@ -249,7 +256,25 @@ export async function softDeleteCategory(categoryId: Category['id']) {
     isDeleted: 1,
   }
 
-  await database.put(STORE_NAMES.categories, nextCategory)
+  await categoriesStore.put(nextCategory)
+
+  const dotsByCategory = await dotsStore
+    .index(INDEX_NAMES.dots.categoryId)
+    .getAll(categoryId)
+
+  await Promise.all(
+    dotsByCategory
+      .filter((dot) => dot.isDeleted !== 1)
+      .map((dot) =>
+        dotsStore.put({
+          ...dot,
+          deletedAt,
+          isDeleted: 1,
+        }),
+      ),
+  )
+
+  await transaction.done
 
   return nextCategory
 }
