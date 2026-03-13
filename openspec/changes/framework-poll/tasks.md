@@ -34,8 +34,8 @@
 ## 4. Zustand 狀態管理
 
 - [x] 4.1 建立 store/dotBoardStore.ts 使用 Zustand 作為狀態管理定義 categories 與 dots 狀態，實作資料模型正規化
-- [ ] 4.2 實作 isAdminUnlocked 狀態實作 admin mode UI state
-- [ ] 4.3 實作 loadData action 從 IndexedDB 載入資料
+- [x] 4.2 實作 isAdminUnlocked 狀態實作 admin mode UI state
+- [x] 4.3 實作 loadData action 從 IndexedDB 載入資料
 - [ ] 4.4 實作 unlockAdmin action 實作 admin password verification
 - [ ] 4.5 實作 lockAdmin action 鎖定管理員模式
 - [ ] 4.6 實作 addCategory action create category（儲存至 IndexedDB）

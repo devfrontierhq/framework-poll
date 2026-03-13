@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 
 import type { Category, Dot } from '@/types/dotBoard'
+import { getActiveCategories, getActiveDots } from '@/db'
 
 export type DotBoardState = {
   categories: Map<string, Category>
@@ -8,9 +9,8 @@ export type DotBoardState = {
   isAdminUnlocked: boolean
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type DotBoardActions = {
-  // Actions 將在後續任務中實作
+  loadData: () => Promise<void>
 }
 
 export type DotBoardStore = DotBoardState & DotBoardActions
@@ -21,6 +21,17 @@ const initialState: DotBoardState = {
   isAdminUnlocked: false,
 }
 
-export const useDotBoardStore = create<DotBoardStore>(() => ({
+export const useDotBoardStore = create<DotBoardStore>((set) => ({
   ...initialState,
+  loadData: async () => {
+    const [categories, dots] = await Promise.all([
+      getActiveCategories(),
+      getActiveDots(),
+    ])
+
+    set({
+      categories: new Map(categories.map((cat) => [cat.id, cat])),
+      dots: new Map(dots.map((dot) => [dot.id, dot])),
+    })
+  },
 }))
