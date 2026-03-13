@@ -11,6 +11,7 @@ export function buildCategory(overrides: Partial<Category> = {}): Category {
     color: '#3b82f6',
     createdAt: new Date().toISOString(),
     deletedAt: null,
+    isDeleted: 0,
     ...overrides,
   }
 }
@@ -27,6 +28,7 @@ export function buildDot(overrides: Partial<Dot> = {}): Dot {
     yRatio: 0.5,
     createdAt: new Date().toISOString(),
     deletedAt: null,
+    isDeleted: 0,
     ...overrides,
   }
 }

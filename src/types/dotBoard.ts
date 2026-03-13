@@ -4,6 +4,7 @@ export type Category = {
   color: string
   createdAt: string
   deletedAt: string | null
+  isDeleted: 0 | 1
 }
 
 export type Dot = {
@@ -14,6 +15,7 @@ export type Dot = {
   yRatio: number
   createdAt: string
   deletedAt: string | null
+  isDeleted: 0 | 1
 }
 
 export type CsvRow = {

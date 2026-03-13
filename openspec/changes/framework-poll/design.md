@@ -39,7 +39,7 @@
 
 **理由：**
 - localStorage 有 5-10MB 容量限制，IndexedDB 可儲存更多資料
-- IndexedDB 支援索引查詢，效能更好（特別是 `[categoryId, deletedAt]` 複合索引）
+- IndexedDB 支援索引查詢，效能更好（特別是 `[categoryId, isDeleted]` 複合索引）
 - 支援事務操作，資料一致性更佳
 - 未來若需要大量資料時更容易擴展
 
@@ -68,7 +68,7 @@
 - 保留歷史資料供 CSV 匯出使用
 - 未來可能需要恢復誤刪資料
 - 符合資料審計需求
-- 對效能影響小（透過 `deletedAt` 索引過濾）
+- 對效能影響小（透過 `isDeleted` 索引過濾，`deletedAt` 專注保存刪除時間）
 
 **替代方案考慮：**
 - 硬刪除：資料無法恢復，不符合需求

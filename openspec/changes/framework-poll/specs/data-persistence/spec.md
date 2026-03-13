@@ -26,13 +26,15 @@ The system SHALL create an IndexedDB database with specific stores and indexes.
 - **WHEN** the database is created
 - **THEN** a store named "categories" MUST exist
 - **THEN** an index on "deletedAt" MUST exist
+- **THEN** an index on "isDeleted" MUST exist
 
 #### Scenario: Dots store
 - **WHEN** the database is created
 - **THEN** a store named "dots" MUST exist
 - **THEN** an index on "categoryId" MUST exist
 - **THEN** an index on "deletedAt" MUST exist
-- **THEN** a compound index on "[categoryId, deletedAt]" MUST exist
+- **THEN** an index on "isDeleted" MUST exist
+- **THEN** a compound index on "[categoryId, isDeleted]" MUST exist
 
 ### Requirement: Soft delete implementation
 
@@ -74,6 +76,7 @@ The system SHALL store categories with required fields.
 - **THEN** it MUST have a color field (string, hex format)
 - **THEN** it MUST have a createdAt field (string, ISO format)
 - **THEN** it MUST have a deletedAt field (string or null)
+- **THEN** it MUST have an isDeleted field (0 or 1)
 
 ### Requirement: Dot data model
 
@@ -86,6 +89,7 @@ The system SHALL store dots with required fields including position.
 - **THEN** it MUST have a name field (string)
 - **THEN** it MUST have a createdAt field (string, ISO format)
 - **THEN** it MUST have a deletedAt field (string or null)
+- **THEN** it MUST have an isDeleted field (0 or 1)
 - **THEN** it MUST have an xRatio field (number, 0 to 1)
 - **THEN** it MUST have a yRatio field (number, 0 to 1)
 
@@ -95,8 +99,8 @@ The system SHALL use compound indexes for efficient queries.
 
 #### Scenario: Query category dots
 - **WHEN** the system needs to display dots for a category
-- **THEN** it MUST use the [categoryId, deletedAt] compound index
-- **THEN** it MUST filter for deletedAt equals null
+- **THEN** it MUST use the [categoryId, isDeleted] compound index
+- **THEN** it MUST filter for isDeleted equals 0
 
 ### Requirement: Cascade delete
 
