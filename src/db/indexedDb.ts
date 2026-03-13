@@ -258,6 +258,12 @@ export async function softDeleteCategory(categoryId: Category['id']) {
     return undefined
   }
 
+  // If already deleted, preserve original deletedAt timestamp
+  if (category.isDeleted === 1) {
+    await transaction.done
+    return category
+  }
+
   const deletedAt = getTimestamp()
   const nextCategory: Category = {
     ...category,
@@ -411,6 +417,11 @@ export async function softDeleteDot(dotId: Dot['id']) {
 
   if (!dot) {
     return undefined
+  }
+
+  // If already deleted, preserve original deletedAt timestamp
+  if (dot.isDeleted === 1) {
+    return dot
   }
 
   const deletedAt = getTimestamp()
