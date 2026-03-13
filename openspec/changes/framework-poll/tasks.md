@@ -24,8 +24,8 @@
 
 - [x] 3.1 建立 db/indexedDb.ts store data in IndexedDB：初始化資料庫 "framework-poll-db" 實作 database structure
 - [x] 3.2 建立 categories store 並加入 deletedAt 索引
-- [ ] 3.3 建立 dots store 並加入 categoryId、deletedAt 索引
-- [ ] 3.4 建立 dots store 的 [categoryId, isDeleted] 複合索引用於 query optimization
+- [x] 3.3 建立 dots store 並加入 categoryId、deletedAt 索引
+- [x] 3.4 建立 dots store 的 [categoryId, isDeleted] 複合索引用於 query optimization
 - [ ] 3.5 實作 Category CRUD 函式（create category, read, update, soft delete implementation）實作 timestamp format with ISO strings
 - [ ] 3.6 實作 Dot CRUD 函式（create, read, update, soft delete implementation）store dot position with xRatio/yRatio
 - [ ] 3.7 實作 cascade delete：刪除 category 時連動軟刪除所有 dots
