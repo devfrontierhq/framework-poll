@@ -1,5 +1,5 @@
-import { createId } from '../src/utils/id'
-import type { Category, CsvRow, Dot } from '../src/types/dotBoard'
+import type { Category, CsvRow, Dot } from '@/types/dotBoard'
+import { createId } from '@/utils/id'
 
 /**
  * 建立測試用 Category 資料
