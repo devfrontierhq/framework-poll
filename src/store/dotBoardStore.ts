@@ -4,6 +4,8 @@ import type { Category, Dot } from '@/types/dotBoard'
 import {
   getActiveCategories,
   getActiveDots,
+  getAllCategories,
+  getAllDots,
   createCategory,
   updateCategory,
   softDeleteCategory,
@@ -11,6 +13,7 @@ import {
   softDeleteDot,
 } from '@/db'
 import { getAdminSecret } from '@/utils/env'
+import { buildCsvRows, downloadCsv } from '@/utils/csv'
 
 export type DotBoardState = {
   categories: Map<string, Category>
@@ -35,6 +38,7 @@ export type DotBoardActions = {
     yRatio: number,
   ) => Promise<Dot>
   removeDot: (dotId: string) => Promise<Dot | undefined>
+  exportCsv: () => Promise<void>
 }
 
 export type DotBoardStore = DotBoardState & DotBoardActions
@@ -156,5 +160,18 @@ export const useDotBoardStore = create<DotBoardStore>((set) => ({
     }
 
     return deletedDot
+  },
+  exportCsv: async () => {
+    // Fetch all data from IndexedDB (including deleted records)
+    const [allCategories, allDots] = await Promise.all([
+      getAllCategories(),
+      getAllDots(),
+    ])
+
+    // Build CSV rows with category name resolution
+    const csvRows = buildCsvRows(allDots, allCategories)
+
+    // Download CSV file with UTF-8 BOM encoding
+    downloadCsv(csvRows)
   },
 }))
