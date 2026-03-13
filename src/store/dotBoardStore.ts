@@ -2,6 +2,7 @@ import { create } from 'zustand'
 
 import type { Category, Dot } from '@/types/dotBoard'
 import { getActiveCategories, getActiveDots } from '@/db'
+import { getAdminSecret } from '@/utils/env'
 
 export type DotBoardState = {
   categories: Map<string, Category>
@@ -11,6 +12,8 @@ export type DotBoardState = {
 
 export type DotBoardActions = {
   loadData: () => Promise<void>
+  unlockAdmin: (password: string) => boolean
+  lockAdmin: () => void
 }
 
 export type DotBoardStore = DotBoardState & DotBoardActions
@@ -33,5 +36,24 @@ export const useDotBoardStore = create<DotBoardStore>((set) => ({
       categories: new Map(categories.map((cat) => [cat.id, cat])),
       dots: new Map(dots.map((dot) => [dot.id, dot])),
     })
+  },
+  unlockAdmin: (password: string) => {
+    const adminSecret = getAdminSecret()
+
+    // Edge cases: no admin secret configured or empty password
+    if (!adminSecret || !password) {
+      return false
+    }
+
+    const isValid = password === adminSecret
+
+    if (isValid) {
+      set({ isAdminUnlocked: true })
+    }
+
+    return isValid
+  },
+  lockAdmin: () => {
+    set({ isAdminUnlocked: false })
   },
 }))
