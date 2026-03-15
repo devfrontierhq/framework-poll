@@ -1,6 +1,8 @@
 import { render, screen, cleanup } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 
+import { createMockDotBoardStore } from '@test/store'
+
 import App from './App'
 import { useDotBoardStore } from './store/dotBoardStore'
 
@@ -10,30 +12,9 @@ vi.mock('./store/dotBoardStore', () => ({
 }))
 
 describe('App', () => {
-  const createMockStore = () => ({
-    // State
-    categories: new Map(),
-    dots: new Map(),
-    isAdminUnlocked: false,
-    isInitialized: false,
-    isLoading: false,
-    loadError: null,
-    // Actions
-    loadData: vi.fn(),
-    unlockAdmin: vi.fn(),
-    lockAdmin: vi.fn(),
-    verifyAdminPassword: vi.fn(),
-    addCategory: vi.fn(),
-    editCategory: vi.fn(),
-    removeCategory: vi.fn(),
-    addDot: vi.fn(),
-    removeDot: vi.fn(),
-    exportCsv: vi.fn(),
-  })
-
   beforeEach(() => {
     // Setup default mock implementation
-    const mockStore = createMockStore()
+    const mockStore = createMockDotBoardStore()
     vi.mocked(useDotBoardStore).mockImplementation((selector) =>
       selector(mockStore),
     )
@@ -54,9 +35,10 @@ describe('App', () => {
   })
 
   it('calls loadData on mount', () => {
-    const mockStore = createMockStore()
     const loadDataMock = vi.fn()
-    mockStore.loadData = loadDataMock
+    const mockStore = createMockDotBoardStore({
+      loadData: loadDataMock,
+    })
 
     vi.mocked(useDotBoardStore).mockImplementation((selector) =>
       selector(mockStore),
