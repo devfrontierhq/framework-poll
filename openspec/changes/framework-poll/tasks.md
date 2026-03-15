@@ -59,7 +59,7 @@
 
 - [x] 6.1 建立 App.tsx 主元件並初始化 Zustand store 使用 IndexedDB
 - [x] 6.2 建立 EmptyState.tsx 顯示無版塊時的空狀態
-- [ ] 6.3 建立 CategoryGrid.tsx 實作 display categories 響應式 Grid 佈局（桌機 4 欄、平板 2 欄、手機 1 欄）
+- [x] 6.3 建立 CategoryGrid.tsx 實作 display categories 響應式 Grid 佈局（桌機 4 欄、平板 3 欄、手機 1 欄）
 - [ ] 6.4 建立 CategoryCard.tsx 顯示版塊標題、顏色、apply category color、dot 計數
 - [ ] 6.5 在 CategoryCard 實作顯示未刪除 dots 的功能實作 no duplicate name validation
 - [ ] 6.6 實作 handle dot overlap：dots 的半透明（opacity: 0.8）與邊框樣式處理圓點重疊時辨識度降低

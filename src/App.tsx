@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 
 import { useDotBoardStore } from '@/store/dotBoardStore'
 import { EmptyState } from '@/components/EmptyState'
+import { CategoryGrid } from '@/components/CategoryGrid'
 
 function App() {
   const loadData = useDotBoardStore((state) => state.loadData)
@@ -10,6 +11,8 @@ function App() {
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  const categoryList = Array.from(categories.values())
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-16">
@@ -24,7 +27,7 @@ function App() {
         {categories.size === 0 ? (
           <EmptyState />
         ) : (
-          <div>{/* TODO: Add CategoryGrid component */}</div>
+          <CategoryGrid categories={categoryList} />
         )}
 
         {/* TODO: Add admin controls */}

@@ -61,7 +61,7 @@ The system SHALL display all non-deleted categories in a responsive grid layout.
 
 #### Scenario: Tablet layout
 - **WHEN** the viewport width is between 768px and 1023px
-- **THEN** the system displays categories in a 2-column grid
+- **THEN** the system displays categories in a 3-column grid
 
 #### Scenario: Mobile layout
 - **WHEN** the viewport width is less than 768px
