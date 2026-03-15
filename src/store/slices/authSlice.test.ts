@@ -35,7 +35,6 @@ describe('Admin Password Verification Logic', () => {
       setState,
       getState,
       subscribe: vi.fn(),
-      destroy: vi.fn(),
       getInitialState: vi.fn(),
     }) as unknown as DotBoardStore
   })
