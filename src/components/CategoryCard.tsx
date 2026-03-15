@@ -1,5 +1,6 @@
 import type { Category, Dot } from '@/types/dotBoard'
 
+import { getBoundedPosition } from '@/lib/dotPosition'
 import { useDotBoardStore } from '@/store/dotBoardStore'
 import { getCategoryDots } from '@/utils/count'
 
@@ -23,10 +24,18 @@ export function CategoryCard({ category, dots }: CategoryCardProps) {
     <div className="flex min-h-[300px] flex-col rounded-lg border border-slate-200 bg-white shadow-sm">
       {/* Header with title and optional count (admin mode only) */}
       <div className="border-b border-slate-200 p-4">
-        <h3 className="text-lg font-bold" style={{ color: category.color }}>
-          {category.title}
-          {isAdminUnlocked ? ` - ${dotCount}` : ''}
-        </h3>
+        <div className="flex items-center gap-3">
+          <span
+            data-testid="category-color-swatch"
+            aria-hidden="true"
+            className="h-3 w-3 rounded-full border border-slate-200 shadow-sm"
+            style={{ backgroundColor: category.color }}
+          />
+          <h3 className="text-lg font-bold text-slate-900">
+            {category.title}
+            {isAdminUnlocked ? ` - ${dotCount}` : ''}
+          </h3>
+        </div>
       </div>
 
       {/* Dot display area */}
@@ -37,8 +46,8 @@ export function CategoryCard({ category, dots }: CategoryCardProps) {
             data-testid="category-dot-wrapper"
             className="group absolute -translate-x-1/2 -translate-y-1/2"
             style={{
-              left: `${dot.xRatio * 100}%`,
-              top: `${dot.yRatio * 100}%`,
+              left: getBoundedPosition(dot.xRatio),
+              top: getBoundedPosition(dot.yRatio),
             }}
           >
             <div

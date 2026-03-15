@@ -2,6 +2,7 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { buildCategory, buildDot } from '@test/builders'
+import { getBoundedPosition } from '@/lib/dotPosition'
 import { createMockDotBoardStore } from '@test/store'
 
 import { CategoryCard } from './CategoryCard'
@@ -69,6 +70,23 @@ describe('CategoryCard', () => {
     }
   })
 
+  it('keeps the title readable for light category colors while showing the category color in a swatch', () => {
+    const category = buildCategory({
+      id: 'category-1',
+      color: '#FFFFFF',
+      title: 'Vue',
+    })
+
+    render(<CategoryCard category={category} dots={new Map()} />)
+
+    const heading = screen.getByRole('heading', { name: 'Vue' })
+    const swatch = screen.getByTestId('category-color-swatch')
+
+    expect(heading).not.toHaveStyle({ color: category.color })
+    expect(heading.className).toContain('text-slate-900')
+    expect(swatch.style.backgroundColor).toBe(category.color)
+  })
+
   it('renders a hover label for each dot using CSS tooltip classes', () => {
     const category = buildCategory({
       id: 'category-1',
@@ -92,5 +110,11 @@ describe('CategoryCard', () => {
     expect(hoverLabel).toHaveTextContent('Alice')
     expect(hoverLabel.className).toContain('opacity-0')
     expect(hoverLabel.className).toContain('group-hover:opacity-100')
+  })
+
+  it('bounds edge ratios so dots stay fully inside the plotting area', () => {
+    expect(getBoundedPosition(0)).toBe('clamp(6px, 0%, calc(100% - 6px))')
+    expect(getBoundedPosition(1)).toBe('clamp(6px, 100%, calc(100% - 6px))')
+    expect(getBoundedPosition(0.5)).toBe('clamp(6px, 50%, calc(100% - 6px))')
   })
 })
