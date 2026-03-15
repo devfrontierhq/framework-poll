@@ -154,4 +154,43 @@ export const createCategorySlice: StateCreator<
 
     return deletedCategory
   },
+
+  initializeDefaultCategories: async () => {
+    // Temporarily elevate privileges to create default categories
+    const wasUnlocked = get().isAdminUnlocked
+
+    try {
+      // Temporarily unlock admin mode
+      if (!wasUnlocked) {
+        set({ isAdminUnlocked: true })
+      }
+
+      // Create default framework categories
+      const reactInput = prepareNewCategoryInput('React', '#61dafb')
+      const reactCategory = await createCategory(reactInput)
+
+      const vueInput = prepareNewCategoryInput('Vue', '#42b883')
+      const vueCategory = await createCategory(vueInput)
+
+      const angularInput = prepareNewCategoryInput('Angular', '#dd0031')
+      const angularCategory = await createCategory(angularInput)
+
+      // Update state with all three categories
+      set((state) => {
+        const nextCategories = new Map(state.categories)
+        nextCategories.set(reactCategory.id, reactCategory)
+        nextCategories.set(vueCategory.id, vueCategory)
+        nextCategories.set(angularCategory.id, angularCategory)
+
+        return {
+          categories: nextCategories,
+        }
+      })
+    } finally {
+      // Restore original admin state
+      if (!wasUnlocked) {
+        set({ isAdminUnlocked: false })
+      }
+    }
+  },
 })
