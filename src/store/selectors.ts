@@ -1,22 +1,40 @@
+import { createSelector } from 'reselect'
+
 import type { Dot } from '@/types/dotBoard'
 import { groupDotsByCategory } from '@/utils/count'
 
 import type { DotBoardStore } from './types'
 
-export function selectCategoryList(state: DotBoardStore) {
-  return Array.from(state.categories.values())
-}
+// Base selectors
+export const selectCategories = (state: DotBoardStore) => state.categories
+export const selectDots = (state: DotBoardStore) => state.dots
 
-export function selectDotsByCategory(state: DotBoardStore) {
-  return groupDotsByCategory(state.dots.values())
-}
+// Memoized derived selectors
+export const selectCategoryList = createSelector(
+  [selectCategories],
+  (categories) => Array.from(categories.values()),
+)
 
+export const selectDotsByCategory = createSelector([selectDots], (dots) =>
+  groupDotsByCategory(dots.values()),
+)
+
+export const selectCategoryCount = createSelector(
+  [selectCategories],
+  (categories) => categories.size,
+)
+
+// Parameterized selectors
 export function selectCategoryDotCount(categoryId: string) {
-  return (state: DotBoardStore) =>
-    selectDotsByCategory(state).get(categoryId)?.length ?? 0
+  return createSelector(
+    [selectDotsByCategory],
+    (dotsByCategory) => dotsByCategory.get(categoryId)?.length ?? 0,
+  )
 }
 
 export function selectCategoryDots(categoryId: string) {
-  return (state: DotBoardStore): Dot[] =>
-    selectDotsByCategory(state).get(categoryId) ?? []
+  return createSelector(
+    [selectDotsByCategory],
+    (dotsByCategory): Dot[] => dotsByCategory.get(categoryId) ?? [],
+  )
 }

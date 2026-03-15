@@ -26,11 +26,9 @@ export const createDotSlice: StateCreator<DotBoardStore, [], [], DotSlice> = (
   ) => {
     const dot = await createDot({ categoryId, name, xRatio, yRatio })
 
-    set((state) => {
-      const dots = new Map(state.dots)
-      dots.set(dot.id, dot)
-      return { dots }
-    })
+    set((state) => ({
+      dots: new Map(state.dots).set(dot.id, dot),
+    }))
 
     return dot
   },

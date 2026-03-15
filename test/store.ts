@@ -18,6 +18,7 @@ export function createMockDotBoardStore(
     addCategory: vi.fn(),
     editCategory: vi.fn(),
     removeCategory: vi.fn(),
+    initializeDefaultCategories: vi.fn(),
     addDot: vi.fn(),
     removeDot: vi.fn(),
     loadData: vi.fn(),

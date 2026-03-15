@@ -42,6 +42,7 @@ export type CategoryActions = {
     categoryId: string,
     password: string,
   ) => Promise<Category | undefined>
+  initializeDefaultCategories: () => Promise<void>
 }
 
 export type DotActions = {

@@ -26,6 +26,7 @@ function buildStore(overrides: Partial<DotBoardStore> = {}): DotBoardStore {
     },
     editCategory: async () => undefined,
     removeCategory: async () => undefined,
+    initializeDefaultCategories: async () => {},
     addDot: async () => {
       throw new Error('Not implemented in test')
     },
@@ -37,7 +38,7 @@ function buildStore(overrides: Partial<DotBoardStore> = {}): DotBoardStore {
 }
 
 describe('store selectors', () => {
-  it('selectCategoryList returns categories in insertion order', () => {
+  it('selectCategoryList returns categories from Map', () => {
     const reactCategory = buildCategory({ id: 'react', title: 'React' })
     const vueCategory = buildCategory({ id: 'vue', title: 'Vue' })
     const store = buildStore({
@@ -47,77 +48,112 @@ describe('store selectors', () => {
       ]),
     })
 
-    expect(selectCategoryList(store).map((category) => category.title)).toEqual(
-      ['React', 'Vue'],
-    )
+    const result = selectCategoryList(store)
+
+    expect(result.map((category) => category.title)).toEqual(['React', 'Vue'])
   })
 
-  it('selectDotsByCategory groups only active dots by category', () => {
+  it('selectCategoryList memoizes results', () => {
+    const categoriesMap = new Map([
+      ['react', buildCategory({ id: 'react', title: 'React' })],
+    ])
+
+    const store = buildStore({ categories: categoriesMap })
+
+    const result1 = selectCategoryList(store)
+    const result2 = selectCategoryList(store)
+
+    // Same input Map → same output array reference (memoization)
+    expect(result1).toBe(result2)
+  })
+
+  it('selectDotsByCategory groups only active dots', () => {
+    const dot1 = buildDot({
+      id: 'dot-1',
+      categoryId: 'react',
+      name: 'Alice',
+    })
+    const dot2 = buildDot({
+      id: 'dot-2',
+      categoryId: 'vue',
+      name: 'Bob',
+    })
+    const dot3 = buildDot({
+      id: 'dot-3',
+      categoryId: 'react',
+      name: 'Carol',
+      deletedAt: new Date().toISOString(),
+      isDeleted: 1,
+    })
+
     const store = buildStore({
       dots: new Map([
-        [
-          'dot-1',
-          buildDot({
-            id: 'dot-1',
-            categoryId: 'react',
-            name: 'Alice',
-          }),
-        ],
-        [
-          'dot-2',
-          buildDot({
-            id: 'dot-2',
-            categoryId: 'vue',
-            name: 'Bob',
-          }),
-        ],
-        [
-          'dot-3',
-          buildDot({
-            id: 'dot-3',
-            categoryId: 'react',
-            name: 'Carol',
-            deletedAt: new Date().toISOString(),
-            isDeleted: 1,
-          }),
-        ],
+        ['dot-1', dot1],
+        ['dot-2', dot2],
+        ['dot-3', dot3],
       ]),
     })
 
     const dotsByCategory = selectDotsByCategory(store)
 
+    // Only active dots (Carol is deleted)
     expect(dotsByCategory.get('react')?.map((dot) => dot.name)).toEqual([
       'Alice',
     ])
     expect(dotsByCategory.get('vue')?.map((dot) => dot.name)).toEqual(['Bob'])
   })
 
-  it('selectCategoryDots and selectCategoryDotCount read grouped dots', () => {
+  it('selectDotsByCategory memoizes results', () => {
+    const dotsMap = new Map([
+      ['dot-1', buildDot({ id: 'dot-1', categoryId: 'react', name: 'Alice' })],
+    ])
+
+    const store = buildStore({ dots: dotsMap })
+
+    const result1 = selectDotsByCategory(store)
+    const result2 = selectDotsByCategory(store)
+
+    // Same input Map → same output Map reference (memoization)
+    expect(result1).toBe(result2)
+  })
+
+  it('selectCategoryDots filters dots by category', () => {
+    const dot1 = buildDot({
+      id: 'dot-1',
+      categoryId: 'react',
+      name: 'Alice',
+    })
+    const dot2 = buildDot({
+      id: 'dot-2',
+      categoryId: 'react',
+      name: 'Bob',
+    })
+
+    const store = buildStore({
+      dots: new Map([
+        ['dot-1', dot1],
+        ['dot-2', dot2],
+      ]),
+    })
+
+    const reactDots = selectCategoryDots('react')(store)
+    const vueDots = selectCategoryDots('vue')(store)
+
+    expect(reactDots.map((dot) => dot.name)).toEqual(['Alice', 'Bob'])
+    expect(vueDots).toEqual([])
+  })
+
+  it('selectCategoryDotCount counts dots by category', () => {
     const store = buildStore({
       dots: new Map([
         [
           'dot-1',
-          buildDot({
-            id: 'dot-1',
-            categoryId: 'react',
-            name: 'Alice',
-          }),
+          buildDot({ id: 'dot-1', categoryId: 'react', name: 'Alice' }),
         ],
-        [
-          'dot-2',
-          buildDot({
-            id: 'dot-2',
-            categoryId: 'react',
-            name: 'Bob',
-          }),
-        ],
+        ['dot-2', buildDot({ id: 'dot-2', categoryId: 'react', name: 'Bob' })],
       ]),
     })
 
-    expect(selectCategoryDots('react')(store).map((dot) => dot.name)).toEqual([
-      'Alice',
-      'Bob',
-    ])
     expect(selectCategoryDotCount('react')(store)).toBe(2)
     expect(selectCategoryDotCount('vue')(store)).toBe(0)
   })
