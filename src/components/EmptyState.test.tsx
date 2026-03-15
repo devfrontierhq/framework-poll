@@ -1,11 +1,18 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { toast } from 'sonner'
 
 import { EmptyState } from './EmptyState'
 import { useDotBoardStore } from '@/store/dotBoardStore'
 
 vi.mock('@/store/dotBoardStore')
+vi.mock('sonner', () => ({
+  toast: {
+    error: vi.fn(),
+    success: vi.fn(),
+  },
+}))
 
 function mockStore({
   initializeDefaultCategories = vi.fn(),
@@ -55,6 +62,8 @@ describe('EmptyState', () => {
     await waitFor(() => {
       expect(initializeDefaultCategories).toHaveBeenCalledTimes(1)
     })
+
+    expect(toast.success).toHaveBeenCalledWith('預設板塊建立成功')
   })
 
   it('handles initialization errors gracefully', async () => {
@@ -75,6 +84,8 @@ describe('EmptyState', () => {
     await waitFor(() => {
       expect(initializeDefaultCategories).toHaveBeenCalledTimes(1)
     })
+
+    expect(toast.error).toHaveBeenCalledWith('建立預設板塊失敗：Test error')
   })
 
   it('disables the button while initialization is in progress', () => {
