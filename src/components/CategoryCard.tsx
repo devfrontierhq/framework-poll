@@ -7,6 +7,10 @@ type CategoryCardProps = {
   dots: Map<string, Dot>
 }
 
+const DOT_OPACITY = 0.8
+const DOT_BORDER = '2px solid rgba(255, 255, 255, 0.95)'
+const DOT_OVERLAP_RING = '0 0 0 1px rgba(15, 23, 42, 0.16)'
+
 export function CategoryCard({ category, dots }: CategoryCardProps) {
   const isAdminUnlocked = useDotBoardStore((state) => state.isAdminUnlocked)
 
@@ -29,12 +33,15 @@ export function CategoryCard({ category, dots }: CategoryCardProps) {
         {categoryDots.map((dot) => (
           <div
             key={dot.id}
-            className="absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white"
+            data-testid="category-dot"
+            className="absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
             style={{
               left: `${dot.xRatio * 100}%`,
               top: `${dot.yRatio * 100}%`,
               backgroundColor: category.color,
-              opacity: 0.8,
+              border: DOT_BORDER,
+              boxShadow: DOT_OVERLAP_RING,
+              opacity: DOT_OPACITY,
             }}
             title={dot.name}
           />
