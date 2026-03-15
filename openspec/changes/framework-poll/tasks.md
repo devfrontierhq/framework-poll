@@ -47,8 +47,8 @@
 
 ## 5. 核心邏輯測試
 
-- [ ] 5.1 測試 CSV date formatting：日期格式化函式（formatCsvDateTime）
-- [ ] 5.2 測試 buildCsvRows 函式產生正確的 CSV 資料
+- [x] 5.1 測試 CSV date formatting：日期格式化函式（formatCsvDateTime）
+- [x] 5.2 測試 buildCsvRows 函式產生正確的 CSV 資料
 - [ ] 5.3 測試軟刪除機制 soft delete implementation 規則：deletedAt 為 null 時顯示，否則過濾
 - [ ] 5.4 測試 category cascade delete：刪除連動軟刪除所有 dots
 - [ ] 5.5 測試計數規則 update category count：只計算 deletedAt === null 的 dots
