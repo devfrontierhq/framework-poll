@@ -53,7 +53,7 @@
 - [x] 5.4 測試 category cascade delete：刪除連動軟刪除所有 dots
 - [x] 5.5 測試計數規則 update category count：只計算 deletedAt === null 的 dots
 - [x] 5.6 測試管理員密鑰策略 admin password verification 邏輯
-- [ ] 5.7 測試相對座標系統 store dot position 計算：xRatio = x / width, yRatio = y / height
+- [x] 5.7 測試相對座標系統 store dot position 計算：xRatio = x / width, yRatio = y / height
 
 ## 6. UI 骨架元件
 
