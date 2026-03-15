@@ -55,7 +55,7 @@ The system SHALL allow administrators to soft-delete dots after confirming with 
 - **THEN** the system displays a confirmation dialog requesting admin password
 - **WHEN** the administrator enters the correct password
 - **THEN** the system soft-deletes the dot by setting deletedAt timestamp
-- **THEN** the category dot count decrements by 1
+- **THEN** the category dot count (if displayed in admin mode) decrements by 1
 
 #### Scenario: Delete with incorrect password
 - **WHEN** an administrator enters an incorrect password
@@ -68,19 +68,27 @@ The system SHALL allow administrators to soft-delete dots after confirming with 
 
 ### Requirement: Update category count
 
-The system SHALL automatically update category dot counts when dots are added or deleted.
+The system SHALL automatically calculate and update category dot counts when dots are added or deleted. The count is only displayed in admin mode.
 
 #### Scenario: Count after adding dot
 - **WHEN** a new dot is added to a category
-- **THEN** the displayed count for that category MUST increment by 1
+- **THEN** the calculated count for that category MUST increment by 1
+- **THEN** the count is displayed in admin mode
 
 #### Scenario: Count after deleting dot
 - **WHEN** a dot is deleted from a category
-- **THEN** the displayed count for that category MUST decrement by 1
+- **THEN** the calculated count for that category MUST decrement by 1
+- **THEN** the count is displayed in admin mode
 
 #### Scenario: Count excludes deleted dots
 - **WHEN** calculating category dot count
 - **THEN** the system MUST only count dots where deletedAt is null
+
+#### Scenario: Count visibility
+- **WHEN** admin mode is enabled
+- **THEN** the system SHALL display category dot counts
+- **WHEN** admin mode is disabled
+- **THEN** the system SHALL NOT display category dot counts
 
 ### Requirement: No duplicate name validation
 

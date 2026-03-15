@@ -7,6 +7,7 @@ import { CategoryGrid } from '@/components/CategoryGrid'
 function App() {
   const loadData = useDotBoardStore((state) => state.loadData)
   const categories = useDotBoardStore((state) => state.categories)
+  const dots = useDotBoardStore((state) => state.dots)
 
   useEffect(() => {
     loadData()
@@ -27,7 +28,7 @@ function App() {
         {categories.size === 0 ? (
           <EmptyState />
         ) : (
-          <CategoryGrid categories={categoryList} />
+          <CategoryGrid categories={categoryList} dots={dots} />
         )}
 
         {/* TODO: Add admin controls */}

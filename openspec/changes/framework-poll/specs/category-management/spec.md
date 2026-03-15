@@ -67,10 +67,14 @@ The system SHALL display all non-deleted categories in a responsive grid layout.
 - **WHEN** the viewport width is less than 768px
 - **THEN** the system displays categories in a 1-column layout
 
-#### Scenario: Show dot count
-- **WHEN** a category is displayed
+#### Scenario: Show dot count in admin mode
+- **WHEN** a category is displayed in admin mode
 - **THEN** the system shows the category title and the count of non-deleted dots
 - **THEN** the count format MUST be "Title - Count" (e.g., "React - 12")
+
+#### Scenario: Hide dot count for non-admin
+- **WHEN** a category is displayed without admin mode
+- **THEN** the system shows only the category title without the count
 
 ### Requirement: Store category color
 

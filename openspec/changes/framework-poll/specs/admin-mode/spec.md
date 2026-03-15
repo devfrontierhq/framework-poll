@@ -73,7 +73,7 @@ The system SHALL restrict certain operations to admin mode only.
 #### Scenario: Non-admin can view
 - **WHEN** a non-admin user accesses the application
 - **THEN** the system SHALL display all categories and dots
-- **THEN** the system SHALL display category dot counts
+- **THEN** the system SHALL NOT display category dot counts
 
 #### Scenario: Non-admin can add dots
 - **WHEN** a non-admin user clicks inside a category
