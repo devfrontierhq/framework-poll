@@ -95,6 +95,7 @@ describe('categorySlice initializeDefaultCategories', () => {
     const firstRun = store.initializeDefaultCategories()
 
     expect(store.isSeedingDefaultCategories).toBe(true)
+    expect(store.isAdminUnlocked).toBe(false)
     expect(mockCreateCategory).toHaveBeenCalledTimes(1)
 
     const secondRun = store.initializeDefaultCategories()
@@ -115,6 +116,57 @@ describe('categorySlice initializeDefaultCategories', () => {
 
     expect(store.categories.size).toBe(3)
     expect(store.isSeedingDefaultCategories).toBe(false)
+    expect(store.isAdminUnlocked).toBe(false)
+  })
+
+  it('preserves existing admin state while seeding defaults', async () => {
+    let resolveCategories:
+      | ((value: Awaited<ReturnType<typeof createCategoriesAtomic>>) => void)
+      | undefined
+
+    store.isAdminUnlocked = true
+    mockCreateCategoriesAtomic.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveCategories = resolve
+        }),
+    )
+
+    const initialization = store.initializeDefaultCategories()
+
+    expect(store.isSeedingDefaultCategories).toBe(true)
+    expect(store.isAdminUnlocked).toBe(true)
+
+    resolveCategories?.([
+      {
+        id: 'react-id',
+        title: 'React',
+        color: '#61dafb',
+        createdAt: new Date().toISOString(),
+        deletedAt: null,
+        isDeleted: 0,
+      },
+      {
+        id: 'vue-id',
+        title: 'Vue',
+        color: '#42b883',
+        createdAt: new Date().toISOString(),
+        deletedAt: null,
+        isDeleted: 0,
+      },
+      {
+        id: 'angular-id',
+        title: 'Angular',
+        color: '#dd0031',
+        createdAt: new Date().toISOString(),
+        deletedAt: null,
+        isDeleted: 0,
+      },
+    ])
+
+    await initialization
+
+    expect(store.isAdminUnlocked).toBe(true)
   })
 
   it('creates only missing default categories', async () => {

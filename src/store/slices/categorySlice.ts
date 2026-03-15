@@ -185,16 +185,8 @@ export const createCategorySlice: StateCreator<
       return
     }
 
-    // Temporarily elevate privileges to create default categories
-    const wasUnlocked = get().isAdminUnlocked
-
     try {
       set({ isSeedingDefaultCategories: true })
-
-      // Temporarily unlock admin mode
-      if (!wasUnlocked) {
-        set({ isAdminUnlocked: true })
-      }
 
       // Default seeding must be all-or-nothing to avoid partial IndexedDB writes.
       const createdCategories = await createCategoriesAtomic(
@@ -215,11 +207,6 @@ export const createCategorySlice: StateCreator<
       })
     } finally {
       set({ isSeedingDefaultCategories: false })
-
-      // Restore original admin state
-      if (!wasUnlocked) {
-        set({ isAdminUnlocked: false })
-      }
     }
   },
 })
