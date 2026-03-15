@@ -13,6 +13,22 @@ The system SHALL allow administrators to create new categories with a title and 
 - **WHEN** a non-admin user attempts to access the create category function
 - **THEN** the system SHALL NOT display the create category button
 
+### Requirement: Empty state default category initialization
+
+The system SHALL allow a one-time bootstrap action to create the default framework categories when no active categories exist.
+
+#### Scenario: Initialize default categories from empty state
+- **WHEN** the application has zero active categories
+- **THEN** the system SHALL display an empty state action for creating the default framework categories
+- **WHEN** any user activates that action
+- **THEN** the system SHALL create exactly three categories: React, Vue, and Angular
+- **THEN** the categories SHALL use the predefined colors "#61dafb", "#42b883", and "#dd0031"
+
+#### Scenario: Default initialization is not general category management
+- **WHEN** default categories have been initialized or any active category already exists
+- **THEN** the system SHALL NOT expose the empty state initialization action
+- **THEN** non-admin users SHALL still NOT gain access to the general create category function
+
 ### Requirement: Edit category
 
 The system SHALL allow administrators to edit category title and color without re-entering admin password.

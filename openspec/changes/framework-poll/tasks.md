@@ -65,43 +65,50 @@
 - [x] 6.6 實作 handle dot overlap：dots 的半透明（opacity: 0.8）與邊框樣式處理圓點重疊時辨識度降低
 - [x] 6.7 實作 display dot information：hover dot 時顯示名稱的功能
 
-## 7. 投點流程
+## 7. 初始化功能（解決測試冷啟動問題）
 
-- [ ] 7.1 在 CategoryCard 實作點擊事件取得相對座標
-- [ ] 7.2 建立 AddDotDialog.tsx 元件顯示輸入名稱對話框
-- [ ] 7.3 實作 AddDotDialog 呼叫 addDot action 儲存 xRatio/yRatio
-- [ ] 7.4 實作非管理員使用者也能新增 dot 的功能
-- [ ] 7.5 實作 dot 使用 category 顏色的渲染邏輯
-- [ ] 7.6 實作 category dot count 自動更新功能
+- [ ] 7.1 在 dotBoardStore 新增 initializeDefaultCategories action，作為 empty state bootstrap 例外建立預設板塊
+- [ ] 7.2 實作 initializeDefaultCategories action 建立三大框架板塊（React #61dafb、Vue #42b883、Angular #dd0031）
+- [ ] 7.3 在 EmptyState.tsx 加入「建立預設框架板塊」按鈕（只在 categories.size === 0 時顯示）
+- [ ] 7.4 測試初始化功能：點擊按鈕後建立三個預設板塊，且不解鎖 admin mode、也不開放一般 category CRUD
 
-## 8. 管理員模式
+## 8. 投點流程
 
-- [ ] 8.1 建立 AdminUnlockDialog.tsx 實作管理員密鑰策略 admin password verification：密鑰輸入與驗證
-- [ ] 8.2 實作解鎖後顯示管理功能按鈕實作 admin mode UI state（新增 category、編輯、刪除）
-- [ ] 8.3 建立 AddCategoryDialog.tsx 實作 create category 新增版塊功能
-- [ ] 8.4 實作 AddCategoryDialog 使用原生 input[type="color"] 選擇顏色實作 store category color
-- [ ] 8.5 建立 EditCategoryDialog.tsx 實作 edit category 編輯版塊標題與顏色
-- [ ] 8.6 實作 edit operations without password：編輯操作無需再次輸入密鑰的邏輯
-- [ ] 8.7 建立 DeleteCategoryDialog.tsx 實作 delete category 與 delete operations require password：刪除版塊需要密鑰確認
-- [ ] 8.8 建立 DeleteDotDialog.tsx 實作 delete dot 與 delete operations require password：刪除圓點需要密鑰確認
-- [ ] 8.9 實作 non-admin user permissions：非管理員模式隱藏管理功能按鈕
+- [ ] 8.1 在 CategoryCard 實作點擊事件取得相對座標
+- [ ] 8.2 建立 AddDotDialog.tsx 元件顯示輸入名稱對話框
+- [ ] 8.3 實作 AddDotDialog 呼叫 addDot action 儲存 xRatio/yRatio
+- [ ] 8.4 實作非管理員使用者也能新增 dot 的功能
+- [ ] 8.5 實作 dot 使用 category 顏色的渲染邏輯
+- [ ] 8.6 實作 category dot count 自動更新功能
 
-## 9. 資料匯出
+## 9. 管理員模式
 
-- [ ] 9.1 建立 ExportCsvButton.tsx 元件
-- [ ] 9.2 實作點擊按鈕呼叫 exportCsv action
-- [ ] 9.3 實作 CSV 包含所有記錄（active 與 deleted）
-- [ ] 9.4 實作 CSV 欄位：版塊名稱、項目名稱、建立日期、刪除日期
-- [ ] 9.5 實作日期格式化為 yyyy-MM-dd HH:mm（使用 date-fns）
-- [ ] 9.6 實作未刪除資料的刪除日期欄位輸出空字串
-- [ ] 9.7 實作 CSV 使用 UTF-8 with BOM 編碼防止中文亂碼
+- [ ] 9.1 建立 AdminUnlockDialog.tsx 實作管理員密鑰策略 admin password verification：密鑰輸入與驗證
+- [ ] 9.2 實作解鎖後顯示管理功能按鈕實作 admin mode UI state（新增 category、編輯、刪除）
+- [ ] 9.3 建立 AddCategoryDialog.tsx 實作 create category 新增版塊功能
+- [ ] 9.4 實作 AddCategoryDialog 使用原生 input[type="color"] 選擇顏色實作 store category color
+- [ ] 9.5 建立 EditCategoryDialog.tsx 實作 edit category 編輯版塊標題與顏色
+- [ ] 9.6 實作 edit operations without password：編輯操作無需再次輸入密鑰的邏輯
+- [ ] 9.7 建立 DeleteCategoryDialog.tsx 實作 delete category 與 delete operations require password：刪除版塊需要密鑰確認
+- [ ] 9.8 建立 DeleteDotDialog.tsx 實作 delete dot 與 delete operations require password：刪除圓點需要密鑰確認
+- [ ] 9.9 實作 non-admin user permissions：非管理員模式隱藏管理功能按鈕
 
-## 10. 測試與收尾
+## 10. 資料匯出
 
-- [ ] 10.1 測試 store actions 的單元測試
-- [ ] 10.2 測試管理員模式開關的 UI 互動
-- [ ] 10.3 測試權限控制：非管理員無法看到管理功能
-- [ ] 10.4 測試響應式佈局在不同螢幕尺寸的表現
-- [ ] 10.5 測試空狀態顯示與引導文字
-- [ ] 10.6 測試錯誤提示（例如密鑰錯誤）
-- [ ] 10.7 驗證所有 spec 需求都已實作完成
+- [ ] 10.1 建立 ExportCsvButton.tsx 元件
+- [ ] 10.2 實作點擊按鈕呼叫 exportCsv action
+- [ ] 10.3 實作 CSV 包含所有記錄（active 與 deleted）
+- [ ] 10.4 實作 CSV 欄位：版塊名稱、項目名稱、建立日期、刪除日期
+- [ ] 10.5 實作日期格式化為 yyyy-MM-dd HH:mm（使用 date-fns）
+- [ ] 10.6 實作未刪除資料的刪除日期欄位輸出空字串
+- [ ] 10.7 實作 CSV 使用 UTF-8 with BOM 編碼防止中文亂碼
+
+## 11. 測試與收尾
+
+- [ ] 11.1 測試 store actions 的單元測試
+- [ ] 11.2 測試管理員模式開關的 UI 互動
+- [ ] 11.3 測試權限控制：非管理員無法看到管理功能
+- [ ] 11.4 測試響應式佈局在不同螢幕尺寸的表現
+- [ ] 11.5 測試空狀態顯示與引導文字
+- [ ] 11.6 測試錯誤提示（例如密鑰錯誤）
+- [ ] 11.7 驗證所有 spec 需求都已實作完成
