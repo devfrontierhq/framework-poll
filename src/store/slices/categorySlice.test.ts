@@ -5,15 +5,17 @@ import { createCategorySlice } from './categorySlice'
 
 vi.mock('@/db', () => ({
   createCategory: vi.fn(),
+  createCategoriesAtomic: vi.fn(),
   updateCategory: vi.fn(),
   softDeleteCategory: vi.fn(),
 }))
 
-import { createCategory } from '@/db'
+import { createCategoriesAtomic, createCategory } from '@/db'
 
 describe('categorySlice initializeDefaultCategories', () => {
   let store: DotBoardStore
   const mockCreateCategory = vi.mocked(createCategory)
+  const mockCreateCategoriesAtomic = vi.mocked(createCategoriesAtomic)
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -80,6 +82,15 @@ describe('categorySlice initializeDefaultCategories', () => {
         deletedAt: null,
         isDeleted: 0,
       })
+    mockCreateCategoriesAtomic.mockImplementation(async (inputs) => {
+      const createdCategories = []
+
+      for (const input of inputs) {
+        createdCategories.push(await mockCreateCategory(input))
+      }
+
+      return createdCategories
+    })
 
     const firstRun = store.initializeDefaultCategories()
 
@@ -133,20 +144,45 @@ describe('categorySlice initializeDefaultCategories', () => {
         deletedAt: null,
         isDeleted: 0,
       })
+    mockCreateCategoriesAtomic.mockImplementation(async (inputs) => {
+      const createdCategories = []
+
+      for (const input of inputs) {
+        createdCategories.push(await mockCreateCategory(input))
+      }
+
+      return createdCategories
+    })
 
     await store.initializeDefaultCategories()
 
-    expect(mockCreateCategory).toHaveBeenCalledTimes(2)
-    expect(mockCreateCategory).toHaveBeenNthCalledWith(1, {
-      title: 'Vue',
-      color: '#42b883',
-    })
-    expect(mockCreateCategory).toHaveBeenNthCalledWith(2, {
-      title: 'Angular',
-      color: '#dd0031',
-    })
+    expect(mockCreateCategoriesAtomic).toHaveBeenCalledTimes(1)
+    expect(mockCreateCategoriesAtomic).toHaveBeenCalledWith([
+      {
+        title: 'Vue',
+        color: '#42b883',
+      },
+      {
+        title: 'Angular',
+        color: '#dd0031',
+      },
+    ])
     expect(
       Array.from(store.categories.values()).map(({ title }) => title),
     ).toEqual(['React', 'Vue', 'Angular'])
+  })
+
+  it('does not update store categories when atomic creation fails', async () => {
+    mockCreateCategoriesAtomic.mockRejectedValueOnce(
+      new Error('storage failed'),
+    )
+
+    await expect(store.initializeDefaultCategories()).rejects.toThrow(
+      'storage failed',
+    )
+
+    expect(store.categories.size).toBe(0)
+    expect(store.isSeedingDefaultCategories).toBe(false)
+    expect(store.isAdminUnlocked).toBe(false)
   })
 })

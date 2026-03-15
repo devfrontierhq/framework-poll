@@ -9,7 +9,12 @@ import {
   type CategoryState,
   type CategoryActions,
 } from '../types'
-import { createCategory, updateCategory, softDeleteCategory } from '@/db'
+import {
+  createCategory,
+  createCategoriesAtomic,
+  updateCategory,
+  softDeleteCategory,
+} from '@/db'
 
 export type CategorySlice = CategoryState & CategoryActions
 
@@ -191,12 +196,12 @@ export const createCategorySlice: StateCreator<
         set({ isAdminUnlocked: true })
       }
 
-      const createdCategories = []
-
-      for (const { title, color } of missingDefaults) {
-        const input = prepareNewCategoryInput(title, color)
-        createdCategories.push(await createCategory(input))
-      }
+      // Default seeding must be all-or-nothing to avoid partial IndexedDB writes.
+      const createdCategories = await createCategoriesAtomic(
+        missingDefaults.map(({ title, color }) =>
+          prepareNewCategoryInput(title, color),
+        ),
+      )
 
       set((state) => {
         const nextCategories = new Map(state.categories)

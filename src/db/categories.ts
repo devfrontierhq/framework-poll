@@ -15,20 +15,7 @@ import { getTimestamp, omitUndefinedFields, withDbError } from '@/db/utils'
 export async function createCategory(
   input: CreateCategoryInput,
 ): Promise<Category> {
-  if (!isValidHexColor(input.color)) {
-    throw new DotBoardDataError(
-      `Invalid color format: ${input.color}. Must be hex format (#RRGGBB).`,
-    )
-  }
-
-  const category: Category = {
-    id: createId(),
-    title: input.title,
-    color: input.color,
-    createdAt: getTimestamp(),
-    deletedAt: null,
-    isDeleted: 0,
-  }
+  const category = buildCategory(input)
 
   const database = await getDb()
   await withDbError('create category', () =>
@@ -36,6 +23,33 @@ export async function createCategory(
   )
 
   return category
+}
+
+/**
+ * Use this for workflows that create multiple categories as a single unit.
+ * If any add fails, IndexedDB rolls back the whole transaction so callers
+ * do not end up with partially persisted categories.
+ */
+export async function createCategoriesAtomic(
+  inputs: CreateCategoryInput[],
+): Promise<Category[]> {
+  return withDbError('create categories', async () => {
+    const categories = inputs.map(buildCategory)
+
+    const database = await getDb()
+    const transaction = database.transaction(
+      STORE_NAMES.categories,
+      'readwrite',
+    )
+    const categoriesStore = transaction.objectStore(STORE_NAMES.categories)
+
+    for (const category of categories) {
+      await categoriesStore.add(category)
+    }
+
+    await transaction.done
+    return categories
+  })
 }
 
 export async function getCategory(categoryId: Category['id']) {
@@ -61,6 +75,23 @@ export async function getAllCategories() {
   return withDbError('read all categories', () =>
     database.getAll(STORE_NAMES.categories),
   )
+}
+
+function buildCategory(input: CreateCategoryInput): Category {
+  if (!isValidHexColor(input.color)) {
+    throw new DotBoardDataError(
+      `Invalid color format: ${input.color}. Must be hex format (#RRGGBB).`,
+    )
+  }
+
+  return {
+    id: createId(),
+    title: input.title,
+    color: input.color,
+    createdAt: getTimestamp(),
+    deletedAt: null,
+    isDeleted: 0,
+  }
 }
 
 export async function updateCategory(
