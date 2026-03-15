@@ -63,7 +63,7 @@
 - [x] 6.4 建立 CategoryCard.tsx 顯示版塊標題、顏色、apply category color、dot 計數
 - [x] 6.5 在 CategoryCard 實作顯示未刪除 dots 的功能實作 no duplicate name validation
 - [x] 6.6 實作 handle dot overlap：dots 的半透明（opacity: 0.8）與邊框樣式處理圓點重疊時辨識度降低
-- [ ] 6.7 實作 display dot information：hover dot 時顯示名稱的功能
+- [x] 6.7 實作 display dot information：hover dot 時顯示名稱的功能
 
 ## 7. 投點流程
 

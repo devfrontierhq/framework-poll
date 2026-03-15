@@ -1,4 +1,5 @@
 import type { Category, Dot } from '@/types/dotBoard'
+
 import { useDotBoardStore } from '@/store/dotBoardStore'
 import { getCategoryDots } from '@/utils/count'
 
@@ -33,18 +34,31 @@ export function CategoryCard({ category, dots }: CategoryCardProps) {
         {categoryDots.map((dot) => (
           <div
             key={dot.id}
-            data-testid="category-dot"
-            className="absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
+            data-testid="category-dot-wrapper"
+            className="group absolute -translate-x-1/2 -translate-y-1/2"
             style={{
               left: `${dot.xRatio * 100}%`,
               top: `${dot.yRatio * 100}%`,
-              backgroundColor: category.color,
-              border: DOT_BORDER,
-              boxShadow: DOT_OVERLAP_RING,
-              opacity: DOT_OPACITY,
             }}
-            title={dot.name}
-          />
+          >
+            <div
+              data-testid="category-dot"
+              className="h-3 w-3 rounded-full"
+              style={{
+                backgroundColor: category.color,
+                border: DOT_BORDER,
+                boxShadow: DOT_OVERLAP_RING,
+                opacity: DOT_OPACITY,
+              }}
+              aria-label={dot.name}
+            />
+            <div
+              data-testid="dot-hover-label"
+              className="pointer-events-none absolute top-0 left-1/2 z-10 -translate-x-1/2 -translate-y-full rounded-md bg-slate-950 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
+            >
+              {dot.name}
+            </div>
+          </div>
         ))}
       </div>
     </div>
