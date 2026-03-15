@@ -1,58 +1,27 @@
-import { Button } from '@/components/ui/button'
+import { useEffect } from 'react'
+
+import { useDotBoardStore } from '@/store/dotBoardStore'
 
 function App() {
-  return (
-    <main className="min-h-screen bg-linear-to-br from-slate-950 via-cyan-950 to-emerald-950 px-6 py-16 text-white">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10">
-        <section className="rounded-3xl border border-white/15 bg-white/10 p-8 shadow-2xl shadow-cyan-950/30 backdrop-blur">
-          <div className="mb-6 inline-flex rounded-full border border-cyan-300/40 bg-cyan-300/10 px-3 py-1 text-sm font-semibold tracking-[0.2em] text-cyan-100 uppercase">
-            Tailwind Check
-          </div>
-          <h1 className="max-w-3xl text-5xl font-black tracking-tight text-balance sm:text-6xl">
-            Framework Poll is rendering with Tailwind CSS.
-          </h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-200">
-            This page intentionally uses gradients, transparency, spacing,
-            responsive typography, and grid utilities so style failures are
-            obvious immediately.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-4">
-            <Button className="rounded-full bg-cyan-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-400/30 hover:bg-cyan-200">
-              Primary Action
-            </Button>
-            <Button
-              variant="outline"
-              className="rounded-full border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15"
-            >
-              Secondary Action
-            </Button>
-          </div>
-        </section>
+  const loadData = useDotBoardStore((state) => state.loadData)
 
-        <section className="grid gap-4 md:grid-cols-3">
-          <article className="rounded-2xl bg-amber-300 p-6 text-slate-950 shadow-lg">
-            <p className="text-sm font-semibold tracking-[0.2em] uppercase">
-              Color
-            </p>
-            <p className="mt-3 text-2xl font-black">
-              Solid utility backgrounds
-            </p>
-          </article>
-          <article className="rounded-2xl bg-fuchsia-500 p-6 text-white shadow-lg">
-            <p className="text-sm font-semibold tracking-[0.2em] uppercase">
-              Layout
-            </p>
-            <p className="mt-3 text-2xl font-black">Responsive grid columns</p>
-          </article>
-          <article className="rounded-2xl border border-emerald-200/30 bg-emerald-400/20 p-6 text-white shadow-lg">
-            <p className="text-sm font-semibold tracking-[0.2em] uppercase">
-              Effects
-            </p>
-            <p className="mt-3 text-2xl font-black">
-              Blur, opacity, and shadows
-            </p>
-          </article>
-        </section>
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  return (
+    <main className="min-h-screen bg-slate-50 px-6 py-16">
+      <div className="mx-auto flex max-w-6xl flex-col gap-10">
+        <header className="text-center">
+          <h1 className="text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
+            Framework Poll
+          </h1>
+          <p className="mt-4 text-lg text-slate-700">快速登記你使用的框架</p>
+        </header>
+
+        {/* TODO: Add CategoryGrid component */}
+        {/* TODO: Add EmptyState component */}
+        {/* TODO: Add admin controls */}
       </div>
     </main>
   )
