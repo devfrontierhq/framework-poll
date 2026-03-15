@@ -19,6 +19,12 @@ export type DotState = {
   dots: Map<string, Dot>
 }
 
+export type DataState = {
+  isInitialized: boolean
+  isLoading: boolean
+  loadError: string | null
+}
+
 // Action types
 export type AuthActions = {
   verifyAdminPassword: (password: string) => boolean
@@ -60,6 +66,7 @@ export type ExportActions = {
 export type DotBoardStore = AuthState &
   CategoryState &
   DotState &
+  DataState &
   AuthActions &
   CategoryActions &
   DotActions &
