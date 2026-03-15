@@ -50,9 +50,46 @@ describe('App', () => {
   })
 
   it('displays EmptyState when there are no categories', () => {
+    const mockStore = createMockDotBoardStore({
+      isInitialized: true,
+    })
+
+    vi.mocked(useDotBoardStore).mockImplementation((selector) =>
+      selector(mockStore),
+    )
+
     render(<App />)
 
     expect(screen.getByText('尚無版塊')).toBeInTheDocument()
     expect(screen.getByText(/管理員目前還沒有建立任何版塊/)).toBeInTheDocument()
+  })
+
+  it('does not display EmptyState before load completes', () => {
+    const mockStore = createMockDotBoardStore({
+      isLoading: true,
+    })
+
+    vi.mocked(useDotBoardStore).mockImplementation((selector) =>
+      selector(mockStore),
+    )
+
+    render(<App />)
+
+    expect(screen.getByText('載入中...')).toBeInTheDocument()
+    expect(screen.queryByText('尚無版塊')).not.toBeInTheDocument()
+  })
+
+  it('displays load error when initialization fails', () => {
+    const mockStore = createMockDotBoardStore({
+      loadError: 'boom',
+    })
+
+    vi.mocked(useDotBoardStore).mockImplementation((selector) =>
+      selector(mockStore),
+    )
+
+    render(<App />)
+
+    expect(screen.getByRole('alert')).toHaveTextContent('載入資料失敗：boom')
   })
 })

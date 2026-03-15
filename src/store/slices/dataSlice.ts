@@ -41,9 +41,6 @@ export const createDataSlice: StateCreator<DotBoardStore, [], [], DataSlice> = (
         error instanceof Error ? error.message : 'Failed to load data'
 
       set({ loadError: errorMessage })
-
-      // Re-throw to allow caller to handle if needed
-      throw error
     } finally {
       set({ isLoading: false })
     }
