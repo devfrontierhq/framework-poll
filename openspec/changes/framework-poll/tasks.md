@@ -33,27 +33,27 @@
 
 ## 4. Zustand 狀態管理
 
-- [ ] 4.1 建立 store/dotBoardStore.ts 使用 Zustand 作為狀態管理定義 categories 與 dots 狀態，實作資料模型正規化
-- [ ] 4.2 實作 isAdminUnlocked 狀態實作 admin mode UI state
-- [ ] 4.3 實作 loadData action 從 IndexedDB 載入資料
-- [ ] 4.4 實作 unlockAdmin action 實作 admin password verification
-- [ ] 4.5 實作 lockAdmin action 鎖定管理員模式
-- [ ] 4.6 實作 addCategory action create category（儲存至 IndexedDB）
-- [ ] 4.7 實作 updateCategory action edit category 更新版塊標題與顏色實作 store category color
-- [ ] 4.8 實作 softDeleteCategory action delete category 軟刪除版塊與連動刪除 dots
-- [ ] 4.9 實作 addDot action add dot by clicking（計算 xRatio/yRatio 並儲存）
-- [ ] 4.10 實作 softDeleteDot action delete dot 軟刪除圓點
-- [ ] 4.11 實作 exportCsv action export to CSV 匯出 CSV 檔案實作 export all dots 與 include all records
+- [x] 4.1 建立 store/dotBoardStore.ts 使用 Zustand 作為狀態管理定義 categories 與 dots 狀態，實作資料模型正規化
+- [x] 4.2 實作 isAdminUnlocked 狀態實作 admin mode UI state
+- [x] 4.3 實作 loadData action 從 IndexedDB 載入資料
+- [x] 4.4 實作 unlockAdmin action 實作 admin password verification
+- [x] 4.5 實作 lockAdmin action 鎖定管理員模式
+- [x] 4.6 實作 addCategory action create category（儲存至 IndexedDB）
+- [x] 4.7 實作 updateCategory action edit category 更新版塊標題與顏色實作 store category color
+- [x] 4.8 實作 softDeleteCategory action delete category 軟刪除版塊與連動刪除 dots
+- [x] 4.9 實作 addDot action add dot by clicking（計算 xRatio/yRatio 並儲存）
+- [x] 4.10 實作 softDeleteDot action delete dot 軟刪除圓點
+- [x] 4.11 實作 exportCsv action export to CSV 匯出 CSV 檔案實作 export all dots 與 include all records
 
 ## 5. 核心邏輯測試
 
-- [ ] 5.1 測試 CSV date formatting：日期格式化函式（formatCsvDateTime）
-- [ ] 5.2 測試 buildCsvRows 函式產生正確的 CSV 資料
-- [ ] 5.3 測試軟刪除機制 soft delete implementation 規則：deletedAt 為 null 時顯示，否則過濾
-- [ ] 5.4 測試 category cascade delete：刪除連動軟刪除所有 dots
-- [ ] 5.5 測試計數規則 update category count：只計算 deletedAt === null 的 dots
-- [ ] 5.6 測試管理員密鑰策略 admin password verification 邏輯
-- [ ] 5.7 測試相對座標系統 store dot position 計算：xRatio = x / width, yRatio = y / height
+- [x] 5.1 測試 CSV date formatting：日期格式化函式（formatCsvDateTime）
+- [x] 5.2 測試 buildCsvRows 函式產生正確的 CSV 資料
+- [x] 5.3 測試軟刪除機制 soft delete implementation 規則：deletedAt 為 null 時顯示，否則過濾
+- [x] 5.4 測試 category cascade delete：刪除連動軟刪除所有 dots
+- [x] 5.5 測試計數規則 update category count：只計算 deletedAt === null 的 dots
+- [x] 5.6 測試管理員密鑰策略 admin password verification 邏輯
+- [x] 5.7 測試相對座標系統 store dot position 計算：xRatio = x / width, yRatio = y / height
 
 ## 6. UI 骨架元件
 

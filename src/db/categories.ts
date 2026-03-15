@@ -82,6 +82,10 @@ export async function updateCategory(
       return undefined
     }
 
+    if (category.isDeleted === 1) {
+      await transaction.done
+      return category
+    }
     if (
       sanitizedUpdates.color !== undefined &&
       !isValidHexColor(sanitizedUpdates.color)
