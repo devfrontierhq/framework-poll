@@ -2,14 +2,18 @@ import { useEffect } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
 import { useDotBoardStore } from '@/store/dotBoardStore'
-import { selectCategoryList, selectDotsByCategory } from '@/store/selectors'
+import {
+  selectCategoryList,
+  selectDotsByCategory,
+  selectCategoryCount,
+} from '@/store/selectors'
 
 import { EmptyState } from '@/components/EmptyState'
 import { CategoryGrid } from '@/components/CategoryGrid'
 
 function App() {
   const loadData = useDotBoardStore((state) => state.loadData)
-  const categories = useDotBoardStore((state) => state.categories)
+  const categoryCount = useDotBoardStore(selectCategoryCount)
 
   const categoryList = useDotBoardStore(selectCategoryList)
   const dotsByCategory = useDotBoardStore(selectDotsByCategory)
@@ -46,7 +50,7 @@ function App() {
       )
     }
 
-    if (categories.size === 0) {
+    if (categoryCount === 0) {
       return <EmptyState />
     }
 
@@ -56,8 +60,8 @@ function App() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-6 py-16">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10">
+    <main className="h-screen bg-slate-50 px-6 py-16">
+      <div className="mx-auto flex h-full max-w-6xl flex-col gap-10">
         <header className="text-center">
           <h1 className="text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
             Framework Poll
@@ -65,7 +69,7 @@ function App() {
           <p className="mt-4 text-lg text-slate-700">快速登記你使用的框架</p>
         </header>
 
-        {renderContent()}
+        <div className="flex-1">{renderContent()}</div>
 
         {/* TODO: Add admin controls */}
       </div>
