@@ -11,7 +11,8 @@ import {
 } from '../types'
 import {
   createCategory,
-  createCategoriesAtomic,
+  getActiveDots,
+  initializeDefaultCategoriesAtomic,
   updateCategory,
   softDeleteCategory,
 } from '@/db'
@@ -172,38 +173,27 @@ export const createCategorySlice: StateCreator<
       return
     }
 
-    const existingTitles = new Set(
-      Array.from(get().categories.values()).map((category) =>
-        category.title.trim().toLowerCase(),
-      ),
-    )
-    const missingDefaults = DEFAULT_CATEGORIES.filter(
-      ({ title }) => !existingTitles.has(title.toLowerCase()),
-    )
-
-    if (missingDefaults.length === 0) {
-      return
-    }
-
     try {
       set({ isSeedingDefaultCategories: true })
 
-      // Default seeding must be all-or-nothing to avoid partial IndexedDB writes.
-      const createdCategories = await createCategoriesAtomic(
-        missingDefaults.map(({ title, color }) =>
+      // Finish the category bootstrap transaction before reading dots so a
+      // stale tab cannot overwrite newer votes with an older dots snapshot.
+      const categories = await initializeDefaultCategoriesAtomic(
+        DEFAULT_CATEGORIES.map(({ title, color }) =>
           prepareNewCategoryInput(title, color),
         ),
       )
 
-      set((state) => {
-        const nextCategories = new Map(state.categories)
-        createdCategories.forEach((category) => {
-          nextCategories.set(category.id, category)
-        })
+      set({
+        categories: new Map(
+          categories.map((category) => [category.id, category]),
+        ),
+      })
 
-        return {
-          categories: nextCategories,
-        }
+      const dots = await getActiveDots()
+
+      set({
+        dots: new Map(dots.map((dot) => [dot.id, dot])),
       })
     } finally {
       set({ isSeedingDefaultCategories: false })

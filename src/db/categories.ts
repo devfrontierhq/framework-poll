@@ -12,6 +12,10 @@ import {
 } from '@/db/schema'
 import { getTimestamp, omitUndefinedFields, withDbError } from '@/db/utils'
 
+function normalizeCategoryTitle(title: string) {
+  return title.trim().toLowerCase()
+}
+
 export async function createCategory(
   input: CreateCategoryInput,
 ): Promise<Category> {
@@ -49,6 +53,53 @@ export async function createCategoriesAtomic(
 
     await transaction.done
     return categories
+  })
+}
+
+/**
+ * Bootstrap default categories only when there are currently zero active
+ * categories. Read + optional create happens inside one transaction so stale
+ * tabs cannot append defaults onto a board that is no longer empty.
+ */
+export async function initializeDefaultCategoriesAtomic(
+  inputs: CreateCategoryInput[],
+): Promise<Category[]> {
+  return withDbError('initialize default categories', async () => {
+    const database = await getDb()
+    const transaction = database.transaction(
+      STORE_NAMES.categories,
+      'readwrite',
+    )
+    const categoriesStore = transaction.objectStore(STORE_NAMES.categories)
+    const activeCategories = await categoriesStore
+      .index(INDEX_NAMES.categories.isDeleted)
+      .getAll(0)
+    const activeTitles = new Set(
+      activeCategories.map((category) =>
+        normalizeCategoryTitle(category.title),
+      ),
+    )
+
+    if (activeCategories.length > 0) {
+      await transaction.done
+      return activeCategories
+    }
+
+    for (const input of inputs) {
+      const normalizedTitle = normalizeCategoryTitle(input.title)
+
+      if (activeTitles.has(normalizedTitle)) {
+        continue
+      }
+
+      const category = buildCategory(input)
+      await categoriesStore.add(category)
+      activeCategories.push(category)
+      activeTitles.add(normalizedTitle)
+    }
+
+    await transaction.done
+    return activeCategories
   })
 }
 

@@ -5,20 +5,25 @@ import { createCategorySlice } from './categorySlice'
 
 vi.mock('@/db', () => ({
   createCategory: vi.fn(),
-  createCategoriesAtomic: vi.fn(),
+  getActiveDots: vi.fn(),
+  initializeDefaultCategoriesAtomic: vi.fn(),
   updateCategory: vi.fn(),
   softDeleteCategory: vi.fn(),
 }))
 
-import { createCategoriesAtomic, createCategory } from '@/db'
+import { getActiveDots, initializeDefaultCategoriesAtomic } from '@/db'
 
 describe('categorySlice initializeDefaultCategories', () => {
   let store: DotBoardStore
-  const mockCreateCategory = vi.mocked(createCategory)
-  const mockCreateCategoriesAtomic = vi.mocked(createCategoriesAtomic)
+  const mockGetActiveDots = vi.mocked(getActiveDots)
+  const mockInitializeDefaultCategoriesAtomic = vi.mocked(
+    initializeDefaultCategoriesAtomic,
+  )
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockGetActiveDots.mockResolvedValue([])
+    mockInitializeDefaultCategoriesAtomic.mockResolvedValue([])
 
     const setState = vi.fn((updater) => {
       if (typeof updater === 'function') {
@@ -55,62 +60,57 @@ describe('categorySlice initializeDefaultCategories', () => {
   })
 
   it('prevents duplicate initialization while a request is already in flight', async () => {
-    let resolveFirstCategory:
-      | ((value: Awaited<ReturnType<typeof createCategory>>) => void)
+    let resolveCategories:
+      | ((
+          value: Awaited<ReturnType<typeof initializeDefaultCategoriesAtomic>>,
+        ) => void)
       | undefined
 
-    mockCreateCategory
-      .mockImplementationOnce(
-        () =>
-          new Promise((resolve) => {
-            resolveFirstCategory = resolve
-          }),
-      )
-      .mockResolvedValueOnce({
+    mockInitializeDefaultCategoriesAtomic.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveCategories = resolve
+        }),
+    )
+
+    const firstRun = store.initializeDefaultCategories()
+
+    expect(store.isSeedingDefaultCategories).toBe(true)
+    expect(store.isAdminUnlocked).toBe(false)
+    await Promise.resolve()
+    expect(mockInitializeDefaultCategoriesAtomic).toHaveBeenCalledTimes(1)
+
+    const secondRun = store.initializeDefaultCategories()
+
+    await expect(secondRun).resolves.toBeUndefined()
+    expect(mockInitializeDefaultCategoriesAtomic).toHaveBeenCalledTimes(1)
+
+    resolveCategories?.([
+      {
+        id: 'react-id',
+        title: 'React',
+        color: '#61dafb',
+        createdAt: new Date().toISOString(),
+        deletedAt: null,
+        isDeleted: 0,
+      },
+      {
         id: 'vue-id',
         title: 'Vue',
         color: '#42b883',
         createdAt: new Date().toISOString(),
         deletedAt: null,
         isDeleted: 0,
-      })
-      .mockResolvedValueOnce({
+      },
+      {
         id: 'angular-id',
         title: 'Angular',
         color: '#dd0031',
         createdAt: new Date().toISOString(),
         deletedAt: null,
         isDeleted: 0,
-      })
-    mockCreateCategoriesAtomic.mockImplementation(async (inputs) => {
-      const createdCategories = []
-
-      for (const input of inputs) {
-        createdCategories.push(await mockCreateCategory(input))
-      }
-
-      return createdCategories
-    })
-
-    const firstRun = store.initializeDefaultCategories()
-
-    expect(store.isSeedingDefaultCategories).toBe(true)
-    expect(store.isAdminUnlocked).toBe(false)
-    expect(mockCreateCategory).toHaveBeenCalledTimes(1)
-
-    const secondRun = store.initializeDefaultCategories()
-
-    await expect(secondRun).resolves.toBeUndefined()
-    expect(mockCreateCategory).toHaveBeenCalledTimes(1)
-
-    resolveFirstCategory?.({
-      id: 'react-id',
-      title: 'React',
-      color: '#61dafb',
-      createdAt: new Date().toISOString(),
-      deletedAt: null,
-      isDeleted: 0,
-    })
+      },
+    ])
 
     await firstRun
 
@@ -121,11 +121,13 @@ describe('categorySlice initializeDefaultCategories', () => {
 
   it('preserves existing admin state while seeding defaults', async () => {
     let resolveCategories:
-      | ((value: Awaited<ReturnType<typeof createCategoriesAtomic>>) => void)
+      | ((
+          value: Awaited<ReturnType<typeof initializeDefaultCategoriesAtomic>>,
+        ) => void)
       | undefined
 
     store.isAdminUnlocked = true
-    mockCreateCategoriesAtomic.mockImplementationOnce(
+    mockInitializeDefaultCategoriesAtomic.mockImplementationOnce(
       () =>
         new Promise((resolve) => {
           resolveCategories = resolve
@@ -136,6 +138,7 @@ describe('categorySlice initializeDefaultCategories', () => {
 
     expect(store.isSeedingDefaultCategories).toBe(true)
     expect(store.isAdminUnlocked).toBe(true)
+    await Promise.resolve()
 
     resolveCategories?.([
       {
@@ -169,9 +172,57 @@ describe('categorySlice initializeDefaultCategories', () => {
     expect(store.isAdminUnlocked).toBe(true)
   })
 
-  it('creates only missing default categories', async () => {
-    store.categories.set('existing-react', {
-      id: 'existing-react',
+  it('loads dots only after category bootstrap finishes', async () => {
+    let resolveCategories:
+      | ((
+          value: Awaited<ReturnType<typeof initializeDefaultCategoriesAtomic>>,
+        ) => void)
+      | undefined
+
+    mockInitializeDefaultCategoriesAtomic.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveCategories = resolve
+        }),
+    )
+
+    const initialization = store.initializeDefaultCategories()
+
+    await Promise.resolve()
+
+    expect(mockInitializeDefaultCategoriesAtomic).toHaveBeenCalledTimes(1)
+    expect(mockGetActiveDots).not.toHaveBeenCalled()
+
+    resolveCategories?.([
+      {
+        id: 'react-id',
+        title: 'React',
+        color: '#61dafb',
+        createdAt: new Date().toISOString(),
+        deletedAt: null,
+        isDeleted: 0,
+      },
+    ])
+
+    await initialization
+
+    expect(mockGetActiveDots).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not append defaults when IndexedDB already has active categories', async () => {
+    mockInitializeDefaultCategoriesAtomic.mockResolvedValueOnce([
+      {
+        id: 'svelte-id',
+        title: 'Svelte',
+        color: '#ff3e00',
+        createdAt: new Date().toISOString(),
+        deletedAt: null,
+        isDeleted: 0,
+      },
+    ])
+
+    store.categories.set('stale-empty-snapshot', {
+      id: 'stale-empty-snapshot',
       title: 'React',
       color: '#61dafb',
       createdAt: new Date().toISOString(),
@@ -179,37 +230,14 @@ describe('categorySlice initializeDefaultCategories', () => {
       isDeleted: 0,
     })
 
-    mockCreateCategory
-      .mockResolvedValueOnce({
-        id: 'vue-id',
-        title: 'Vue',
-        color: '#42b883',
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      })
-      .mockResolvedValueOnce({
-        id: 'angular-id',
-        title: 'Angular',
-        color: '#dd0031',
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      })
-    mockCreateCategoriesAtomic.mockImplementation(async (inputs) => {
-      const createdCategories = []
-
-      for (const input of inputs) {
-        createdCategories.push(await mockCreateCategory(input))
-      }
-
-      return createdCategories
-    })
-
     await store.initializeDefaultCategories()
 
-    expect(mockCreateCategoriesAtomic).toHaveBeenCalledTimes(1)
-    expect(mockCreateCategoriesAtomic).toHaveBeenCalledWith([
+    expect(mockInitializeDefaultCategoriesAtomic).toHaveBeenCalledTimes(1)
+    expect(mockInitializeDefaultCategoriesAtomic).toHaveBeenCalledWith([
+      {
+        title: 'React',
+        color: '#61dafb',
+      },
       {
         title: 'Vue',
         color: '#42b883',
@@ -221,11 +249,127 @@ describe('categorySlice initializeDefaultCategories', () => {
     ])
     expect(
       Array.from(store.categories.values()).map(({ title }) => title),
+    ).toEqual(['Svelte'])
+  })
+
+  it('skips creation when defaults already exist in IndexedDB and refreshes stale store', async () => {
+    mockInitializeDefaultCategoriesAtomic.mockResolvedValueOnce([
+      {
+        id: 'react-id',
+        title: 'React',
+        color: '#61dafb',
+        createdAt: new Date().toISOString(),
+        deletedAt: null,
+        isDeleted: 0,
+      },
+      {
+        id: 'vue-id',
+        title: 'Vue',
+        color: '#42b883',
+        createdAt: new Date().toISOString(),
+        deletedAt: null,
+        isDeleted: 0,
+      },
+      {
+        id: 'angular-id',
+        title: 'Angular',
+        color: '#dd0031',
+        createdAt: new Date().toISOString(),
+        deletedAt: null,
+        isDeleted: 0,
+      },
+    ])
+
+    await store.initializeDefaultCategories()
+
+    expect(mockInitializeDefaultCategoriesAtomic).toHaveBeenCalledTimes(1)
+    expect(
+      Array.from(store.categories.values()).map(({ title }) => title),
     ).toEqual(['React', 'Vue', 'Angular'])
   })
 
+  it('refreshes active dots when defaults already exist in IndexedDB', async () => {
+    mockInitializeDefaultCategoriesAtomic.mockResolvedValueOnce([
+      {
+        id: 'react-id',
+        title: 'React',
+        color: '#61dafb',
+        createdAt: new Date().toISOString(),
+        deletedAt: null,
+        isDeleted: 0,
+      },
+      {
+        id: 'vue-id',
+        title: 'Vue',
+        color: '#42b883',
+        createdAt: new Date().toISOString(),
+        deletedAt: null,
+        isDeleted: 0,
+      },
+      {
+        id: 'angular-id',
+        title: 'Angular',
+        color: '#dd0031',
+        createdAt: new Date().toISOString(),
+        deletedAt: null,
+        isDeleted: 0,
+      },
+    ])
+    mockGetActiveDots.mockResolvedValueOnce([
+      {
+        id: 'dot-1',
+        categoryId: 'react-id',
+        name: 'Alice',
+        xRatio: 0.4,
+        yRatio: 0.5,
+        createdAt: new Date().toISOString(),
+        deletedAt: null,
+        isDeleted: 0,
+      },
+    ])
+
+    await store.initializeDefaultCategories()
+
+    expect(mockGetActiveDots).toHaveBeenCalledTimes(1)
+    expect(Array.from(store.dots.values()).map(({ name }) => name)).toEqual([
+      'Alice',
+    ])
+  })
+
+  it('preserves seeded categories in store when dot refresh fails', async () => {
+    mockInitializeDefaultCategoriesAtomic.mockResolvedValueOnce([
+      {
+        id: 'react-id',
+        title: 'React',
+        color: '#61dafb',
+        createdAt: new Date().toISOString(),
+        deletedAt: null,
+        isDeleted: 0,
+      },
+      {
+        id: 'vue-id',
+        title: 'Vue',
+        color: '#42b883',
+        createdAt: new Date().toISOString(),
+        deletedAt: null,
+        isDeleted: 0,
+      },
+    ])
+    mockGetActiveDots.mockRejectedValueOnce(new Error('dot refresh failed'))
+
+    await expect(store.initializeDefaultCategories()).rejects.toThrow(
+      'dot refresh failed',
+    )
+
+    expect(
+      Array.from(store.categories.values()).map(({ title }) => title),
+    ).toEqual(['React', 'Vue'])
+    expect(store.dots.size).toBe(0)
+    expect(store.isSeedingDefaultCategories).toBe(false)
+  })
+
   it('does not update store categories when atomic creation fails', async () => {
-    mockCreateCategoriesAtomic.mockRejectedValueOnce(
+    mockInitializeDefaultCategoriesAtomic.mockRejectedValueOnce(
       new Error('storage failed'),
     )
 
