@@ -2,22 +2,19 @@ import type { Category, Dot } from '@/types/dotBoard'
 
 import { getBoundedPosition } from '@/lib/dotPosition'
 import { useDotBoardStore } from '@/store/dotBoardStore'
-import { getCategoryDots } from '@/utils/count'
 
 type CategoryCardProps = {
   category: Category
-  dots: Map<string, Dot>
+  categoryDots: Dot[]
 }
 
 const DOT_OPACITY = 0.8
 const DOT_BORDER = '2px solid rgba(255, 255, 255, 0.95)'
 const DOT_OVERLAP_RING = '0 0 0 1px rgba(15, 23, 42, 0.16)'
 
-export function CategoryCard({ category, dots }: CategoryCardProps) {
+export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
   const isAdminUnlocked = useDotBoardStore((state) => state.isAdminUnlocked)
 
-  const dotArray = Array.from(dots.values())
-  const categoryDots = getCategoryDots(category.id, dotArray)
   const dotCount = categoryDots.length
 
   return (

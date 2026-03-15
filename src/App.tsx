@@ -2,13 +2,17 @@ import { useEffect } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
 import { useDotBoardStore } from '@/store/dotBoardStore'
+import { selectCategoryList, selectDotsByCategory } from '@/store/selectors'
+
 import { EmptyState } from '@/components/EmptyState'
 import { CategoryGrid } from '@/components/CategoryGrid'
 
 function App() {
   const loadData = useDotBoardStore((state) => state.loadData)
   const categories = useDotBoardStore((state) => state.categories)
-  const dots = useDotBoardStore((state) => state.dots)
+
+  const categoryList = useDotBoardStore(selectCategoryList)
+  const dotsByCategory = useDotBoardStore(selectDotsByCategory)
 
   const { isInitialized, isLoading, loadError } = useDotBoardStore(
     useShallow((state) => ({
@@ -17,8 +21,6 @@ function App() {
       loadError: state.loadError,
     })),
   )
-
-  const categoryList = Array.from(categories.values())
 
   useEffect(() => {
     loadData()
@@ -48,7 +50,9 @@ function App() {
       return <EmptyState />
     }
 
-    return <CategoryGrid categories={categoryList} dots={dots} />
+    return (
+      <CategoryGrid categories={categoryList} dotsByCategory={dotsByCategory} />
+    )
   }
 
   return (

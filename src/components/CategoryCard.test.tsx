@@ -32,30 +32,24 @@ describe('CategoryCard', () => {
       color: '#3b82f6',
       title: 'React',
     })
-    const dots = new Map([
-      [
-        'dot-1',
-        buildDot({
-          id: 'dot-1',
-          categoryId: category.id,
-          name: 'Alice',
-          xRatio: 0.5,
-          yRatio: 0.5,
-        }),
-      ],
-      [
-        'dot-2',
-        buildDot({
-          id: 'dot-2',
-          categoryId: category.id,
-          name: 'Bob',
-          xRatio: 0.52,
-          yRatio: 0.52,
-        }),
-      ],
-    ])
+    const categoryDots = [
+      buildDot({
+        id: 'dot-1',
+        categoryId: category.id,
+        name: 'Alice',
+        xRatio: 0.5,
+        yRatio: 0.5,
+      }),
+      buildDot({
+        id: 'dot-2',
+        categoryId: category.id,
+        name: 'Bob',
+        xRatio: 0.52,
+        yRatio: 0.52,
+      }),
+    ]
 
-    render(<CategoryCard category={category} dots={dots} />)
+    render(<CategoryCard category={category} categoryDots={categoryDots} />)
 
     const renderedDots = screen.getAllByTestId('category-dot')
 
@@ -77,7 +71,7 @@ describe('CategoryCard', () => {
       title: 'Vue',
     })
 
-    render(<CategoryCard category={category} dots={new Map()} />)
+    render(<CategoryCard category={category} categoryDots={[]} />)
 
     const heading = screen.getByRole('heading', { name: 'Vue' })
     const swatch = screen.getByTestId('category-color-swatch')
@@ -101,7 +95,7 @@ describe('CategoryCard', () => {
       yRatio: 0.5,
     })
 
-    render(<CategoryCard category={category} dots={new Map([[dot.id, dot]])} />)
+    render(<CategoryCard category={category} categoryDots={[dot]} />)
 
     const dotWrapper = screen.getByTestId('category-dot-wrapper')
     const hoverLabel = screen.getByTestId('dot-hover-label')
