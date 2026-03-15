@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
 
 import { useDotBoardStore } from '@/store/dotBoardStore'
+import { EmptyState } from '@/components/EmptyState'
 
 function App() {
   const loadData = useDotBoardStore((state) => state.loadData)
+  const categories = useDotBoardStore((state) => state.categories)
 
   useEffect(() => {
     loadData()
@@ -19,8 +21,12 @@ function App() {
           <p className="mt-4 text-lg text-slate-700">快速登記你使用的框架</p>
         </header>
 
-        {/* TODO: Add CategoryGrid component */}
-        {/* TODO: Add EmptyState component */}
+        {categories.size === 0 ? (
+          <EmptyState />
+        ) : (
+          <div>{/* TODO: Add CategoryGrid component */}</div>
+        )}
+
         {/* TODO: Add admin controls */}
       </div>
     </main>
