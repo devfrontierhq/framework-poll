@@ -18,6 +18,12 @@ type CategoryUpdates = {
   color?: string
 }
 
+const DEFAULT_CATEGORIES = [
+  { title: 'React', color: '#61dafb' },
+  { title: 'Vue', color: '#42b883' },
+  { title: 'Angular', color: '#dd0031' },
+] as const
+
 function prepareNewCategoryInput(title: string, color: string) {
   const trimmedTitle = title?.trim()
 
@@ -75,6 +81,7 @@ export const createCategorySlice: StateCreator<
   CategorySlice
 > = (set, get) => ({
   categories: new Map(),
+  isSeedingDefaultCategories: false,
 
   addCategory: async (title: string, color: string) => {
     if (!get().isAdminUnlocked) {
@@ -156,37 +163,54 @@ export const createCategorySlice: StateCreator<
   },
 
   initializeDefaultCategories: async () => {
+    if (get().isSeedingDefaultCategories) {
+      return
+    }
+
+    const existingTitles = new Set(
+      Array.from(get().categories.values()).map((category) =>
+        category.title.trim().toLowerCase(),
+      ),
+    )
+    const missingDefaults = DEFAULT_CATEGORIES.filter(
+      ({ title }) => !existingTitles.has(title.toLowerCase()),
+    )
+
+    if (missingDefaults.length === 0) {
+      return
+    }
+
     // Temporarily elevate privileges to create default categories
     const wasUnlocked = get().isAdminUnlocked
 
     try {
+      set({ isSeedingDefaultCategories: true })
+
       // Temporarily unlock admin mode
       if (!wasUnlocked) {
         set({ isAdminUnlocked: true })
       }
 
-      // Create default framework categories
-      const reactInput = prepareNewCategoryInput('React', '#61dafb')
-      const reactCategory = await createCategory(reactInput)
+      const createdCategories = []
 
-      const vueInput = prepareNewCategoryInput('Vue', '#42b883')
-      const vueCategory = await createCategory(vueInput)
+      for (const { title, color } of missingDefaults) {
+        const input = prepareNewCategoryInput(title, color)
+        createdCategories.push(await createCategory(input))
+      }
 
-      const angularInput = prepareNewCategoryInput('Angular', '#dd0031')
-      const angularCategory = await createCategory(angularInput)
-
-      // Update state with all three categories
       set((state) => {
         const nextCategories = new Map(state.categories)
-        nextCategories.set(reactCategory.id, reactCategory)
-        nextCategories.set(vueCategory.id, vueCategory)
-        nextCategories.set(angularCategory.id, angularCategory)
+        createdCategories.forEach((category) => {
+          nextCategories.set(category.id, category)
+        })
 
         return {
           categories: nextCategories,
         }
       })
     } finally {
+      set({ isSeedingDefaultCategories: false })
+
       // Restore original admin state
       if (!wasUnlocked) {
         set({ isAdminUnlocked: false })

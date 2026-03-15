@@ -7,14 +7,29 @@ import { useDotBoardStore } from '@/store/dotBoardStore'
 
 vi.mock('@/store/dotBoardStore')
 
+function mockStore({
+  initializeDefaultCategories = vi.fn(),
+  isSeedingDefaultCategories = false,
+} = {}) {
+  vi.mocked(useDotBoardStore).mockImplementation((selector) =>
+    selector({
+      initializeDefaultCategories,
+      isSeedingDefaultCategories,
+    } as never),
+  )
+
+  return {
+    initializeDefaultCategories,
+  }
+}
+
 describe('EmptyState', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   it('renders empty state message and initialization button', () => {
-    const mockInitialize = vi.fn()
-    vi.mocked(useDotBoardStore).mockReturnValue(mockInitialize)
+    mockStore()
 
     const { container } = render(<EmptyState />)
 
@@ -27,8 +42,9 @@ describe('EmptyState', () => {
 
   it('calls initializeDefaultCategories when button is clicked', async () => {
     const user = userEvent.setup()
-    const mockInitialize = vi.fn().mockResolvedValue(undefined)
-    vi.mocked(useDotBoardStore).mockReturnValue(mockInitialize)
+    const { initializeDefaultCategories } = mockStore({
+      initializeDefaultCategories: vi.fn().mockResolvedValue(undefined),
+    })
 
     const { container } = render(<EmptyState />)
 
@@ -37,14 +53,17 @@ describe('EmptyState', () => {
     await user.click(button)
 
     await waitFor(() => {
-      expect(mockInitialize).toHaveBeenCalledTimes(1)
+      expect(initializeDefaultCategories).toHaveBeenCalledTimes(1)
     })
   })
 
   it('handles initialization errors gracefully', async () => {
     const user = userEvent.setup()
-    const mockInitialize = vi.fn().mockRejectedValue(new Error('Test error'))
-    vi.mocked(useDotBoardStore).mockReturnValue(mockInitialize)
+    const { initializeDefaultCategories } = mockStore({
+      initializeDefaultCategories: vi
+        .fn()
+        .mockRejectedValue(new Error('Test error')),
+    })
 
     const { container } = render(<EmptyState />)
 
@@ -54,7 +73,17 @@ describe('EmptyState', () => {
     await user.click(button)
 
     await waitFor(() => {
-      expect(mockInitialize).toHaveBeenCalledTimes(1)
+      expect(initializeDefaultCategories).toHaveBeenCalledTimes(1)
     })
+  })
+
+  it('disables the button while initialization is in progress', () => {
+    mockStore({
+      isSeedingDefaultCategories: true,
+    })
+
+    render(<EmptyState />)
+
+    expect(screen.getByRole('button', { name: '建立中...' })).toBeDisabled()
   })
 })

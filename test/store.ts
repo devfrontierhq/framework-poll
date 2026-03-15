@@ -7,6 +7,7 @@ export function createMockDotBoardStore(
 ): DotBoardStore {
   return {
     categories: new Map(),
+    isSeedingDefaultCategories: false,
     dots: new Map(),
     isAdminUnlocked: false,
     isInitialized: false,

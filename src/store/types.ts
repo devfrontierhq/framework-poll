@@ -13,6 +13,7 @@ export type AuthState = {
 
 export type CategoryState = {
   categories: Map<string, Category>
+  isSeedingDefaultCategories: boolean
 }
 
 export type DotState = {

@@ -13,6 +13,7 @@ import type { DotBoardStore } from './types'
 function buildStore(overrides: Partial<DotBoardStore> = {}): DotBoardStore {
   return {
     categories: new Map(),
+    isSeedingDefaultCategories: false,
     dots: new Map(),
     isAdminUnlocked: false,
     isInitialized: true,
