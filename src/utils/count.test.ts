@@ -4,7 +4,7 @@ import { buildCategory, buildDot } from '@test/builders'
 import { isActive } from '@/types/dotBoard'
 import type { Dot } from '@/types/dotBoard'
 
-import { getCategoryDotCount } from './count'
+import { getCategoryDots, getCategoryDotCount } from './count'
 
 describe('Category Dot Count Logic', () => {
   it('should count only non-deleted dots for a category', () => {
@@ -139,5 +139,64 @@ describe('Category Dot Count Logic', () => {
     expect(activeDotsUsingHelper.length).toBe(1)
     expect(activeDotsDirectCheck.length).toBe(1)
     expect(activeDotsUsingHelper.length).toBe(activeDotsDirectCheck.length)
+  })
+})
+
+describe('getCategoryDots', () => {
+  it('should return active dots for specified category', () => {
+    const dots = [
+      buildDot({ categoryId: 'cat-1', name: 'Dot 1', deletedAt: null }),
+      buildDot({ categoryId: 'cat-1', name: 'Dot 2', deletedAt: null }),
+      buildDot({ categoryId: 'cat-2', name: 'Dot 3', deletedAt: null }),
+      buildDot({
+        categoryId: 'cat-1',
+        name: 'Dot 4',
+        deletedAt: '2024-01-01T00:00:00.000Z',
+      }),
+    ]
+
+    const result = getCategoryDots('cat-1', dots)
+
+    expect(result).toHaveLength(2)
+    expect(result[0].name).toBe('Dot 1')
+    expect(result[1].name).toBe('Dot 2')
+  })
+
+  it('should return empty array for category with no active dots', () => {
+    const dots = [
+      buildDot({
+        categoryId: 'cat-1',
+        deletedAt: '2024-01-01T00:00:00.000Z',
+      }),
+    ]
+
+    const result = getCategoryDots('cat-1', dots)
+
+    expect(result).toEqual([])
+  })
+
+  it('should only return dots matching categoryId', () => {
+    const dots = [
+      buildDot({ categoryId: 'cat-1', name: 'A', deletedAt: null }),
+      buildDot({ categoryId: 'cat-2', name: 'B', deletedAt: null }),
+    ]
+
+    const result = getCategoryDots('cat-1', dots)
+
+    expect(result).toHaveLength(1)
+    expect(result[0].categoryId).toBe('cat-1')
+  })
+
+  it('should return all active dots when multiple exist', () => {
+    const dots = [
+      buildDot({ categoryId: 'cat-1', name: 'A', deletedAt: null }),
+      buildDot({ categoryId: 'cat-1', name: 'B', deletedAt: null }),
+      buildDot({ categoryId: 'cat-1', name: 'C', deletedAt: null }),
+    ]
+
+    const result = getCategoryDots('cat-1', dots)
+
+    expect(result).toHaveLength(3)
+    expect(result.map((d) => d.name)).toEqual(['A', 'B', 'C'])
   })
 })
