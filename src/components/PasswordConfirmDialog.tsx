@@ -11,27 +11,45 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { useDotBoardStore } from '@/store/dotBoardStore'
+import { cn } from '@/lib/utils'
 
-type AdminUnlockDialogProps = {
+type PasswordConfirmDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
+  title: string
+  description: string
+  itemName: string
+  onConfirm: (password: string) => Promise<void>
+  successMessage: string
+  errorMessagePrefix?: string
 }
 
-export function AdminUnlockDialog({
+export function PasswordConfirmDialog({
   open,
   onOpenChange,
-}: AdminUnlockDialogProps) {
-  const unlockAdmin = useDotBoardStore((state) => state.unlockAdmin)
-
+  title,
+  description,
+  itemName,
+  onConfirm,
+  successMessage,
+  errorMessagePrefix = '刪除失敗',
+}: PasswordConfirmDialogProps) {
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const closeDialog = () => {
+    setPassword('')
+    onOpenChange(false)
+  }
+
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
-      setPassword('')
+      if (isSubmitting) {
+        return
+      }
+      closeDialog()
+      return
     }
-
     onOpenChange(nextOpen)
   }
 
@@ -45,18 +63,12 @@ export function AdminUnlockDialog({
 
     try {
       setIsSubmitting(true)
-      const isValid = unlockAdmin(trimmedPassword)
-
-      if (isValid) {
-        toast.success('管理員模式已啟用')
-        handleOpenChange(false)
-      } else {
-        toast.error('密碼錯誤，請重試')
-      }
+      await onConfirm(trimmedPassword)
+      toast.success(successMessage)
+      closeDialog()
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : '驗證密碼時發生未知錯誤'
-      toast.error(`驗證失敗：${message}`)
+      const message = error instanceof Error ? error.message : '發生未知錯誤'
+      toast.error(`${errorMessagePrefix}：${message}`)
     } finally {
       setIsSubmitting(false)
     }
@@ -66,28 +78,39 @@ export function AdminUnlockDialog({
     if (isSubmitting) {
       return
     }
-
-    handleOpenChange(false)
+    closeDialog()
   }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className={cn('sm:max-w-[425px]', isSubmitting && '[&>button]:hidden')}
+        onEscapeKeyDown={(event) => {
+          if (isSubmitting) {
+            event.preventDefault()
+          }
+        }}
+        onPointerDownOutside={(event) => {
+          if (isSubmitting) {
+            event.preventDefault()
+          }
+        }}
+      >
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>管理員驗證</DialogTitle>
-            <DialogDescription>請輸入密碼以啟用管理功能</DialogDescription>
+            <DialogTitle>{title}</DialogTitle>
+            <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <label
-                htmlFor="password"
+                htmlFor={`password-confirm-${itemName}`}
                 className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                密碼
+                請輸入管理員密碼以確認刪除
               </label>
               <Input
-                id="password"
+                id={`password-confirm-${itemName}`}
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -107,8 +130,12 @@ export function AdminUnlockDialog({
             >
               取消
             </Button>
-            <Button type="submit" disabled={!password.trim() || isSubmitting}>
-              {isSubmitting ? '驗證中...' : '解鎖'}
+            <Button
+              type="submit"
+              variant="destructive"
+              disabled={!password.trim() || isSubmitting}
+            >
+              {isSubmitting ? '刪除中...' : '確認刪除'}
             </Button>
           </DialogFooter>
         </form>

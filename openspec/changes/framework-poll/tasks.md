@@ -89,9 +89,9 @@
 - [x] 9.4 實作 AddCategoryDialog 使用原生 input[type="color"] 選擇顏色實作 store category color
 - [x] 9.5 建立 EditCategoryDialog.tsx 實作 edit category 編輯版塊標題與顏色
 - [x] 9.6 實作 edit operations without password：編輯操作無需再次輸入密鑰的邏輯
-- [ ] 9.7 建立 DeleteCategoryDialog.tsx 實作 delete category 與 delete operations require password：刪除版塊需要密鑰確認
-- [ ] 9.8 建立 DeleteDotDialog.tsx 實作 delete dot 與 delete operations require password：刪除圓點需要密鑰確認
-- [ ] 9.9 實作 non-admin user permissions：非管理員模式隱藏管理功能按鈕
+- [x] 9.7 建立 DeleteCategoryDialog.tsx 實作 delete category 與 delete operations require password：刪除版塊需要密鑰確認
+- [x] 9.8 建立 DeleteDotDialog.tsx 實作 delete dot 與 delete operations require password：刪除圓點需要密鑰確認
+- [x] 9.9 實作 non-admin user permissions：非管理員模式隱藏管理功能按鈕
 
 ## 10. 資料匯出
 

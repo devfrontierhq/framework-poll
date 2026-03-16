@@ -77,15 +77,24 @@ describe('AdminUnlockDialog', () => {
   it('clears password when dialog is closed', async () => {
     const user = userEvent.setup()
 
-    render(<AdminUnlockDialog open={true} onOpenChange={mockOnOpenChange} />)
+    const { rerender } = render(
+      <AdminUnlockDialog open={true} onOpenChange={mockOnOpenChange} />,
+    )
 
-    const passwordInput = screen.getByPlaceholderText('輸入管理員密碼')
+    const passwordInput = screen.getByPlaceholderText(
+      '輸入管理員密碼',
+    ) as HTMLInputElement
     const cancelButton = screen.getByRole('button', { name: '取消' })
 
     await user.type(passwordInput, 'some-password')
     await user.click(cancelButton)
 
     expect(mockOnOpenChange).toHaveBeenCalledWith(false)
+
+    rerender(<AdminUnlockDialog open={false} onOpenChange={mockOnOpenChange} />)
+    rerender(<AdminUnlockDialog open={true} onOpenChange={mockOnOpenChange} />)
+
+    expect(screen.getByPlaceholderText('輸入管理員密碼')).toHaveValue('')
   })
 
   it('prevents submission with whitespace-only password', async () => {

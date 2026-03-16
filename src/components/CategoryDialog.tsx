@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
 
 import type { Category } from '@/types/dotBoard'
 
@@ -56,6 +57,10 @@ export function CategoryDialog(props: CategoryDialogProps) {
   }
 
   const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen && isSubmitting) {
+      return
+    }
+
     onOpenChange(nextOpen)
   }
 
@@ -126,7 +131,19 @@ export function CategoryDialog(props: CategoryDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className={cn('sm:max-w-[425px]', isSubmitting && '[&>button]:hidden')}
+        onEscapeKeyDown={(event) => {
+          if (isSubmitting) {
+            event.preventDefault()
+          }
+        }}
+        onPointerDownOutside={(event) => {
+          if (isSubmitting) {
+            event.preventDefault()
+          }
+        }}
+      >
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{text.title}</DialogTitle>

@@ -341,5 +341,135 @@ describe('CategoryCard', () => {
       expect(screen.getByText('React')).toBeInTheDocument()
       expect(screen.queryByText('React - 1')).not.toBeInTheDocument()
     })
+
+    it('opens delete dialog when delete button is clicked', async () => {
+      const user = userEvent.setup()
+      const category = buildCategory({
+        id: 'category-1',
+        color: '#3b82f6',
+        title: 'React',
+      })
+
+      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
+        selector(
+          createMockDotBoardStore({
+            isAdminUnlocked: true,
+          }),
+        ),
+      )
+
+      render(<CategoryCard category={category} categoryDots={[]} />)
+
+      const deleteButton = screen.getByRole('button', { name: '刪除版塊' })
+      await user.click(deleteButton)
+
+      // Check that delete dialog is opened
+      expect(screen.getByText('刪除版塊')).toBeInTheDocument()
+      expect(screen.getByText(/確定要刪除「React」嗎？/)).toBeInTheDocument()
+    })
+
+    it('opens delete dot dialog when dot is clicked in admin mode', async () => {
+      const user = userEvent.setup()
+      const category = buildCategory({
+        id: 'category-1',
+        color: '#3b82f6',
+        title: 'React',
+      })
+      const dot = buildDot({
+        id: 'dot-1',
+        categoryId: category.id,
+        name: 'Alice',
+        xRatio: 0.5,
+        yRatio: 0.5,
+      })
+
+      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
+        selector(
+          createMockDotBoardStore({
+            isAdminUnlocked: true,
+          }),
+        ),
+      )
+
+      render(<CategoryCard category={category} categoryDots={[dot]} />)
+
+      const dotElement = screen.getByTestId('category-dot')
+      await user.click(dotElement)
+
+      // Check that delete dot dialog is opened
+      expect(screen.getByText('刪除圓點')).toBeInTheDocument()
+      expect(screen.getByText(/確定要刪除「Alice」嗎？/)).toBeInTheDocument()
+    })
+
+    it('opens delete dot dialog when admin focuses a dot and presses Enter', async () => {
+      const user = userEvent.setup()
+      const category = buildCategory({
+        id: 'category-1',
+        color: '#3b82f6',
+        title: 'React',
+      })
+      const dot = buildDot({
+        id: 'dot-1',
+        categoryId: category.id,
+        name: 'Alice',
+        xRatio: 0.5,
+        yRatio: 0.5,
+      })
+
+      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
+        selector(
+          createMockDotBoardStore({
+            isAdminUnlocked: true,
+          }),
+        ),
+      )
+
+      render(<CategoryCard category={category} categoryDots={[dot]} />)
+
+      const dotButton = screen.getByRole('button', { name: '刪除圓點 Alice' })
+
+      await user.tab()
+      await user.tab()
+      await user.tab()
+
+      expect(dotButton).toHaveFocus()
+
+      await user.keyboard('{Enter}')
+
+      expect(screen.getByText('刪除圓點')).toBeInTheDocument()
+      expect(screen.getByText(/確定要刪除「Alice」嗎？/)).toBeInTheDocument()
+    })
+
+    it('does not open delete dot dialog when dot is clicked in non-admin mode', async () => {
+      const user = userEvent.setup()
+      const category = buildCategory({
+        id: 'category-1',
+        color: '#3b82f6',
+        title: 'React',
+      })
+      const dot = buildDot({
+        id: 'dot-1',
+        categoryId: category.id,
+        name: 'Alice',
+        xRatio: 0.5,
+        yRatio: 0.5,
+      })
+
+      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
+        selector(
+          createMockDotBoardStore({
+            isAdminUnlocked: false,
+          }),
+        ),
+      )
+
+      render(<CategoryCard category={category} categoryDots={[dot]} />)
+
+      const dotElement = screen.getByTestId('category-dot')
+      await user.click(dotElement)
+
+      // Check that delete dot dialog is NOT opened
+      expect(screen.queryByText('刪除圓點')).not.toBeInTheDocument()
+    })
   })
 })
