@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -12,20 +12,33 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 
-import { useDotBoardStore } from '@/store/dotBoardStore'
+import type { Category } from '@/types/dotBoard'
 
-type AddCategoryDialogProps = {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}
+import { useDotBoardStore } from '@/store/dotBoardStore'
 
 const DEFAULT_CATEGORY_COLOR = '#3b82f6'
 
-export function AddCategoryDialog({
-  open,
-  onOpenChange,
-}: AddCategoryDialogProps) {
+type CategoryDialogProps =
+  | {
+      mode: 'add'
+      open: boolean
+      onOpenChange: (open: boolean) => void
+    }
+  | {
+      mode: 'edit'
+      open: boolean
+      onOpenChange: (open: boolean) => void
+      category: Category
+    }
+
+export function CategoryDialog(props: CategoryDialogProps) {
+  const { mode, open, onOpenChange } = props
+  const editCategoryTitle = mode === 'edit' ? props.category.title : undefined
+  const editCategoryColor = mode === 'edit' ? props.category.color : undefined
+
+  // Store actions
   const addCategory = useDotBoardStore((state) => state.addCategory)
+  const editCategory = useDotBoardStore((state) => state.editCategory)
 
   const [formData, setFormData] = useState({
     title: '',
@@ -33,11 +46,16 @@ export function AddCategoryDialog({
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) {
-      setFormData({ title: '', color: DEFAULT_CATEGORY_COLOR })
-    }
+  // Dynamic text based on mode
+  const text = {
+    title: mode === 'add' ? '新增版塊' : '編輯版塊',
+    description:
+      mode === 'add' ? '建立一個新的框架版塊' : '修改版塊的標題與顏色',
+    submitting: mode === 'add' ? '新增中...' : '更新中...',
+    confirm: '確認',
+  }
 
+  const handleOpenChange = (nextOpen: boolean) => {
     onOpenChange(nextOpen)
   }
 
@@ -51,14 +69,31 @@ export function AddCategoryDialog({
 
     try {
       setIsSubmitting(true)
-      await addCategory(trimmedTitle, formData.color)
-      toast.success(`版塊已新增：${trimmedTitle}`)
-      setFormData({ title: '', color: DEFAULT_CATEGORY_COLOR })
+
+      if (mode === 'add') {
+        await addCategory(trimmedTitle, formData.color)
+        toast.success(`版塊已新增：${trimmedTitle}`)
+      } else {
+        const { category } = props
+
+        const updatedCategory = await editCategory(category.id, {
+          title: trimmedTitle,
+          color: formData.color,
+        })
+
+        if (!updatedCategory || updatedCategory.isDeleted === 1) {
+          throw new Error('版塊不存在或已被移除')
+        }
+
+        toast.success(`版塊已更新：${trimmedTitle}`)
+      }
+
       onOpenChange(false)
     } catch (error) {
+      const action = mode === 'add' ? '新增' : '更新'
       const message =
-        error instanceof Error ? error.message : '新增版塊時發生未知錯誤'
-      toast.error(`新增失敗：${message}`)
+        error instanceof Error ? error.message : `${action}版塊時發生未知錯誤`
+      toast.error(`${action}失敗：${message}`)
     } finally {
       setIsSubmitting(false)
     }
@@ -68,17 +103,34 @@ export function AddCategoryDialog({
     if (isSubmitting) {
       return
     }
-
     onOpenChange(false)
   }
+
+  useEffect(() => {
+    if (!open) return
+
+    if (
+      mode === 'edit' &&
+      editCategoryTitle !== undefined &&
+      editCategoryColor !== undefined
+    ) {
+      setFormData({
+        title: editCategoryTitle,
+        color: editCategoryColor,
+      })
+      return
+    }
+
+    setFormData({ title: '', color: DEFAULT_CATEGORY_COLOR })
+  }, [open, mode, editCategoryTitle, editCategoryColor])
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>新增版塊</DialogTitle>
-            <DialogDescription>建立一個新的框架版塊</DialogDescription>
+            <DialogTitle>{text.title}</DialogTitle>
+            <DialogDescription>{text.description}</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
@@ -144,7 +196,7 @@ export function AddCategoryDialog({
               type="submit"
               disabled={!formData.title.trim() || isSubmitting}
             >
-              {isSubmitting ? '新增中...' : '確認'}
+              {isSubmitting ? text.submitting : text.confirm}
             </Button>
           </DialogFooter>
         </form>

@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/EmptyState'
 import { CategoryGrid } from '@/components/CategoryGrid'
 import { AdminUnlockDialog } from '@/components/AdminUnlockDialog'
-import { AddCategoryDialog } from '@/components/AddCategoryDialog'
+import { CategoryDialog } from '@/components/CategoryDialog'
 
 function App() {
   const [showAdminUnlockDialog, setShowAdminUnlockDialog] = useState(false)
@@ -129,7 +129,8 @@ function App() {
         open={showAdminUnlockDialog}
         onOpenChange={setShowAdminUnlockDialog}
       />
-      <AddCategoryDialog
+      <CategoryDialog
+        mode="add"
         open={showAddCategoryDialog}
         onOpenChange={setShowAddCategoryDialog}
       />

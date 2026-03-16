@@ -198,4 +198,148 @@ describe('CategoryCard', () => {
     expect(getBoundedPosition(1)).toBe('clamp(6px, 100%, calc(100% - 6px))')
     expect(getBoundedPosition(0.5)).toBe('clamp(6px, 50%, calc(100% - 6px))')
   })
+
+  describe('Admin Mode UI', () => {
+    it('shows edit and delete buttons when admin is unlocked', () => {
+      const category = buildCategory({
+        id: 'category-1',
+        color: '#3b82f6',
+        title: 'React',
+      })
+
+      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
+        selector(
+          createMockDotBoardStore({
+            isAdminUnlocked: true,
+          }),
+        ),
+      )
+
+      render(<CategoryCard category={category} categoryDots={[]} />)
+
+      expect(
+        screen.getByRole('button', { name: '編輯版塊' }),
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: '刪除版塊' }),
+      ).toBeInTheDocument()
+    })
+
+    it('hides edit and delete buttons when admin is locked', () => {
+      const category = buildCategory({
+        id: 'category-1',
+        color: '#3b82f6',
+        title: 'React',
+      })
+
+      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
+        selector(
+          createMockDotBoardStore({
+            isAdminUnlocked: false,
+          }),
+        ),
+      )
+
+      render(<CategoryCard category={category} categoryDots={[]} />)
+
+      expect(
+        screen.queryByRole('button', { name: '編輯版塊' }),
+      ).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole('button', { name: '刪除版塊' }),
+      ).not.toBeInTheDocument()
+    })
+
+    it('opens edit dialog when edit button is clicked', async () => {
+      const user = userEvent.setup()
+      const category = buildCategory({
+        id: 'category-1',
+        color: '#3b82f6',
+        title: 'React',
+      })
+
+      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
+        selector(
+          createMockDotBoardStore({
+            isAdminUnlocked: true,
+          }),
+        ),
+      )
+
+      render(<CategoryCard category={category} categoryDots={[]} />)
+
+      const editButton = screen.getByRole('button', { name: '編輯版塊' })
+      await user.click(editButton)
+
+      // Check that edit dialog is opened
+      expect(screen.getByText('編輯版塊')).toBeInTheDocument()
+      expect(screen.getByText('修改版塊的標題與顏色')).toBeInTheDocument()
+    })
+
+    it('shows dot count in title when admin is unlocked', () => {
+      const category = buildCategory({
+        id: 'category-1',
+        color: '#3b82f6',
+        title: 'React',
+      })
+      const dots = [
+        buildDot({
+          id: 'dot-1',
+          categoryId: category.id,
+          name: 'Alice',
+          xRatio: 0.5,
+          yRatio: 0.5,
+        }),
+        buildDot({
+          id: 'dot-2',
+          categoryId: category.id,
+          name: 'Bob',
+          xRatio: 0.6,
+          yRatio: 0.6,
+        }),
+      ]
+
+      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
+        selector(
+          createMockDotBoardStore({
+            isAdminUnlocked: true,
+          }),
+        ),
+      )
+
+      render(<CategoryCard category={category} categoryDots={dots} />)
+
+      expect(screen.getByText('React - 2')).toBeInTheDocument()
+    })
+
+    it('hides dot count in title when admin is locked', () => {
+      const category = buildCategory({
+        id: 'category-1',
+        color: '#3b82f6',
+        title: 'React',
+      })
+      const dots = [
+        buildDot({
+          id: 'dot-1',
+          categoryId: category.id,
+          name: 'Alice',
+          xRatio: 0.5,
+          yRatio: 0.5,
+        }),
+      ]
+
+      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
+        selector(
+          createMockDotBoardStore({
+            isAdminUnlocked: false,
+          }),
+        ),
+      )
+
+      render(<CategoryCard category={category} categoryDots={dots} />)
+
+      expect(screen.getByText('React')).toBeInTheDocument()
+      expect(screen.queryByText('React - 1')).not.toBeInTheDocument()
+    })
+  })
 })

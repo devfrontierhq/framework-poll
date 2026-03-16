@@ -1,9 +1,15 @@
 import { useState } from 'react'
+import { Pencil, Trash2 } from 'lucide-react'
+
+import { Button } from '@/components/ui/button'
+
 import type { Category, Dot } from '@/types/dotBoard'
 
 import { AddDotDialog } from '@/components/AddDotDialog'
-import { getBoundedPosition } from '@/lib/dotPosition'
+import { CategoryDialog } from '@/components/CategoryDialog'
+
 import { useDotBoardStore } from '@/store/dotBoardStore'
+import { getBoundedPosition } from '@/lib/dotPosition'
 import { calculateRelativeCoordinates } from '@/utils/coordinates'
 
 type CategoryCardProps = {
@@ -20,6 +26,7 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
   const addDot = useDotBoardStore((state) => state.addDot)
 
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
   const [pendingCoordinates, setPendingCoordinates] = useState<{
     xRatio: number
     yRatio: number
@@ -59,17 +66,45 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
     <div className="flex min-h-[300px] flex-col rounded-lg border border-slate-200 bg-white shadow-sm md:h-full md:min-h-0">
       {/* Header with title and optional count (admin mode only) */}
       <div className="border-b border-slate-200 p-4">
-        <div className="flex items-center gap-3">
-          <span
-            data-testid="category-color-swatch"
-            aria-hidden="true"
-            className="h-3 w-3 rounded-full border border-slate-200 shadow-sm"
-            style={{ backgroundColor: category.color }}
-          />
-          <h3 className="text-lg font-bold text-slate-900">
-            {category.title}
-            {isAdminUnlocked ? ` - ${dotCount}` : ''}
-          </h3>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span
+              data-testid="category-color-swatch"
+              aria-hidden="true"
+              className="h-3 w-3 rounded-full border border-slate-200 shadow-sm"
+              style={{ backgroundColor: category.color }}
+            />
+            <h3 className="text-lg font-bold text-slate-900">
+              {category.title}
+              {isAdminUnlocked ? ` - ${dotCount}` : ''}
+            </h3>
+          </div>
+          {isAdminUnlocked && (
+            <div className="flex gap-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowEditDialog(true)
+                }}
+                aria-label="編輯版塊"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  // TODO: Task 9.7 - Implement DeleteCategoryDialog
+                }}
+                aria-label="刪除版塊"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -114,6 +149,12 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
         onOpenChange={setDialogOpen}
         categoryTitle={category.title}
         onSubmit={handleSubmitDot}
+      />
+      <CategoryDialog
+        mode="edit"
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        category={category}
       />
     </div>
   )
