@@ -9,13 +9,16 @@ import {
   selectCategoryCount,
 } from '@/store/selectors'
 
+import { Button } from '@/components/ui/button'
+
 import { EmptyState } from '@/components/EmptyState'
 import { CategoryGrid } from '@/components/CategoryGrid'
 import { AdminUnlockDialog } from '@/components/AdminUnlockDialog'
-import { Button } from '@/components/ui/button'
+import { AddCategoryDialog } from '@/components/AddCategoryDialog'
 
 function App() {
   const [showAdminUnlockDialog, setShowAdminUnlockDialog] = useState(false)
+  const [showAddCategoryDialog, setShowAddCategoryDialog] = useState(false)
 
   const loadData = useDotBoardStore((state) => state.loadData)
   const lockAdmin = useDotBoardStore((state) => state.lockAdmin)
@@ -43,8 +46,7 @@ function App() {
   }
 
   const handleAddCategoryClick = () => {
-    // TODO: Will be implemented in task 9.3
-    console.log('Add category clicked')
+    setShowAddCategoryDialog(true)
   }
 
   useEffect(() => {
@@ -126,6 +128,10 @@ function App() {
       <AdminUnlockDialog
         open={showAdminUnlockDialog}
         onOpenChange={setShowAdminUnlockDialog}
+      />
+      <AddCategoryDialog
+        open={showAddCategoryDialog}
+        onOpenChange={setShowAddCategoryDialog}
       />
     </main>
   )
