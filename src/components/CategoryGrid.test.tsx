@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { cleanup, render, screen } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { buildCategory, buildDot } from '@test/builders'
 import type { Category, Dot } from '@/types/dotBoard'
@@ -25,6 +25,10 @@ vi.mock('./CategoryCard', () => ({
     ),
   ),
 }))
+
+afterEach(() => {
+  cleanup()
+})
 
 describe('CategoryGrid', () => {
   it('passes each card only its category dots', () => {
@@ -72,5 +76,44 @@ describe('CategoryGrid', () => {
     )
     expect(screen.getByText('Alice')).toBeInTheDocument()
     expect(screen.getByText('Bob')).toBeInTheDocument()
+  })
+
+  it('uses a three-column grid without horizontal scrolling for up to three categories', () => {
+    const categories = [
+      buildCategory({ id: 'category-react', title: 'React' }),
+      buildCategory({ id: 'category-vue', title: 'Vue' }),
+      buildCategory({ id: 'category-angular', title: 'Angular' }),
+    ]
+
+    const { getByTestId } = render(
+      <CategoryGrid categories={categories} dotsByCategory={new Map()} />,
+    )
+
+    expect(getByTestId('category-grid-viewport')).not.toHaveClass(
+      'overflow-x-auto',
+    )
+    expect(getByTestId('category-grid-track')).toHaveClass(
+      'md:grid',
+      'md:grid-cols-3',
+    )
+  })
+
+  it('enables horizontal scrolling with fixed-width columns when there are more than three categories', () => {
+    const categories = [
+      buildCategory({ id: 'category-react', title: 'React' }),
+      buildCategory({ id: 'category-vue', title: 'Vue' }),
+      buildCategory({ id: 'category-angular', title: 'Angular' }),
+      buildCategory({ id: 'category-svelte', title: 'Svelte' }),
+    ]
+
+    const { getByTestId } = render(
+      <CategoryGrid categories={categories} dotsByCategory={new Map()} />,
+    )
+
+    expect(getByTestId('category-grid-viewport')).toHaveClass('overflow-x-auto')
+    expect(getByTestId('category-grid-track')).toHaveClass(
+      'md:inline-flex',
+      'md:flex-row',
+    )
   })
 })

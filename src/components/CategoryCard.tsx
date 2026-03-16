@@ -56,7 +56,7 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
   }
 
   return (
-    <div className="flex min-h-[300px] flex-col rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div className="flex min-h-[300px] flex-col rounded-lg border border-slate-200 bg-white shadow-sm md:h-full md:min-h-0">
       {/* Header with title and optional count (admin mode only) */}
       <div className="border-b border-slate-200 p-4">
         <div className="flex items-center gap-3">
