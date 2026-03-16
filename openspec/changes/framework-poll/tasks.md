@@ -95,13 +95,13 @@
 
 ## 10. 資料匯出
 
-- [ ] 10.1 建立 ExportCsvButton.tsx 元件
-- [ ] 10.2 實作點擊按鈕呼叫 exportCsv action
-- [ ] 10.3 實作 CSV 包含所有記錄（active 與 deleted）
-- [ ] 10.4 實作 CSV 欄位：版塊名稱、項目名稱、建立日期、刪除日期
-- [ ] 10.5 實作日期格式化為 yyyy-MM-dd HH:mm（使用 date-fns）
-- [ ] 10.6 實作未刪除資料的刪除日期欄位輸出空字串
-- [ ] 10.7 實作 CSV 使用 UTF-8 with BOM 編碼防止中文亂碼
+- [x] 10.1 建立 ExportCsvButton.tsx 元件
+- [x] 10.2 實作點擊按鈕呼叫 exportCsv action
+- [x] 10.3 實作 CSV 包含所有記錄（active 與 deleted）
+- [x] 10.4 實作 CSV 欄位：版塊名稱、項目名稱、建立日期、刪除日期
+- [x] 10.5 實作日期格式化為 yyyy-MM-dd HH:mm（使用 date-fns）
+- [x] 10.6 實作未刪除資料的刪除日期欄位輸出空字串
+- [x] 10.7 實作 CSV 使用 UTF-8 with BOM 編碼防止中文亂碼
 
 ## 11. 測試與收尾
 

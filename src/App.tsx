@@ -15,6 +15,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { CategoryGrid } from '@/components/CategoryGrid'
 import { AdminUnlockDialog } from '@/components/AdminUnlockDialog'
 import { CategoryDialog } from '@/components/CategoryDialog'
+import { ExportCsvButton } from '@/components/ExportCsvButton'
 
 function App() {
   const [showAdminUnlockDialog, setShowAdminUnlockDialog] = useState(false)
@@ -116,14 +117,17 @@ function App() {
             </div>
             <div className="flex w-full justify-center gap-2 sm:justify-end">
               {isAdminUnlocked ? (
-                <Button
-                  onClick={handleAddCategoryClick}
-                  variant="default"
-                  size="sm"
-                >
-                  <Plus className="h-4 w-4" />
-                  新增版塊
-                </Button>
+                <>
+                  <ExportCsvButton />
+                  <Button
+                    onClick={handleAddCategoryClick}
+                    variant="default"
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4" />
+                    新增版塊
+                  </Button>
+                </>
               ) : (
                 <Button onClick={handleUnlockClick} variant="outline" size="sm">
                   <Unlock className="h-4 w-4" />
