@@ -1,5 +1,7 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { toast } from 'sonner'
 
 import { buildCategory, buildDot } from '@test/builders'
 import { getBoundedPosition } from '@/lib/dotPosition'
@@ -13,6 +15,13 @@ vi.mock('@/store/dotBoardStore', () => ({
   useDotBoardStore: vi.fn(),
 }))
 
+vi.mock('sonner', () => ({
+  toast: {
+    error: vi.fn(),
+    success: vi.fn(),
+  },
+}))
+
 describe('CategoryCard', () => {
   beforeEach(() => {
     const mockStore = createMockDotBoardStore()
@@ -24,6 +33,84 @@ describe('CategoryCard', () => {
 
   afterEach(() => {
     cleanup()
+  })
+
+  it('keeps the dialog open and preserves the entered name when dot creation fails', async () => {
+    const user = userEvent.setup()
+    const category = buildCategory({
+      id: 'category-1',
+      color: '#3b82f6',
+      title: 'React',
+    })
+    const addDot = vi.fn().mockRejectedValue(new Error('DB offline'))
+
+    vi.mocked(useDotBoardStore).mockImplementation((selector) =>
+      selector(
+        createMockDotBoardStore({
+          addDot,
+        }),
+      ),
+    )
+
+    const { container } = render(
+      <CategoryCard category={category} categoryDots={[]} />,
+    )
+
+    const plotArea = container.querySelector('.cursor-pointer')!
+
+    await user.click(plotArea)
+    await user.type(screen.getByLabelText('名字'), 'Alice')
+    await user.click(screen.getByRole('button', { name: '確認' }))
+
+    await waitFor(() => {
+      expect(addDot).toHaveBeenCalledTimes(1)
+    })
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByLabelText('名字')).toHaveValue('Alice')
+    expect(toast.error).toHaveBeenCalledWith('新增失敗：DB offline')
+  })
+
+  it('closes the dialog after dot creation succeeds', async () => {
+    const user = userEvent.setup()
+    const category = buildCategory({
+      id: 'category-1',
+      color: '#3b82f6',
+      title: 'React',
+    })
+    const addDot = vi.fn().mockResolvedValue(
+      buildDot({
+        id: 'dot-1',
+        categoryId: category.id,
+        name: 'Alice',
+        xRatio: 0.5,
+        yRatio: 0.5,
+      }),
+    )
+
+    vi.mocked(useDotBoardStore).mockImplementation((selector) =>
+      selector(
+        createMockDotBoardStore({
+          addDot,
+        }),
+      ),
+    )
+
+    const { container } = render(
+      <CategoryCard category={category} categoryDots={[]} />,
+    )
+
+    const plotArea = container.querySelector('.cursor-pointer')!
+
+    await user.click(plotArea)
+    await user.type(screen.getByLabelText('名字'), 'Alice')
+    await user.click(screen.getByRole('button', { name: '確認' }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+
+    expect(toast.success).toHaveBeenCalledWith('新增成功：Alice')
   })
 
   it('renders dots with overlap-friendly opacity and visible border styling', () => {

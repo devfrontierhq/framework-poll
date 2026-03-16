@@ -74,12 +74,12 @@
 
 ## 8. 投點流程
 
-- [ ] 8.1 在 CategoryCard 實作點擊事件取得相對座標
-- [ ] 8.2 建立 AddDotDialog.tsx 元件顯示輸入名稱對話框
-- [ ] 8.3 實作 AddDotDialog 呼叫 addDot action 儲存 xRatio/yRatio
-- [ ] 8.4 實作非管理員使用者也能新增 dot 的功能
-- [ ] 8.5 實作 dot 使用 category 顏色的渲染邏輯
-- [ ] 8.6 實作 category dot count 自動更新功能
+- [x] 8.1 在 CategoryCard 實作點擊事件取得相對座標
+- [x] 8.2 建立 AddDotDialog.tsx 元件顯示輸入名稱對話框
+- [x] 8.3 實作 AddDotDialog 呼叫 addDot action 儲存 xRatio/yRatio
+- [x] 8.4 實作非管理員使用者也能新增 dot 的功能
+- [x] 8.5 實作 dot 使用 category 顏色的渲染邏輯
+- [x] 8.6 實作 category dot count 自動更新功能
 
 ## 9. 管理員模式
 

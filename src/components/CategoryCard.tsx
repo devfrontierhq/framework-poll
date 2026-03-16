@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import type { Category, Dot } from '@/types/dotBoard'
 
+import { AddDotDialog } from '@/components/AddDotDialog'
 import { getBoundedPosition } from '@/lib/dotPosition'
 import { useDotBoardStore } from '@/store/dotBoardStore'
+import { calculateRelativeCoordinates } from '@/utils/coordinates'
 
 type CategoryCardProps = {
   category: Category
@@ -14,8 +17,43 @@ const DOT_OVERLAP_RING = '0 0 0 1px rgba(15, 23, 42, 0.16)'
 
 export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
   const isAdminUnlocked = useDotBoardStore((state) => state.isAdminUnlocked)
+  const addDot = useDotBoardStore((state) => state.addDot)
+
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [pendingCoordinates, setPendingCoordinates] = useState<{
+    xRatio: number
+    yRatio: number
+  } | null>(null)
 
   const dotCount = categoryDots.length
+
+  const handleAreaClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    const clickX = event.clientX - rect.left
+    const clickY = event.clientY - rect.top
+
+    const { xRatio, yRatio } = calculateRelativeCoordinates(
+      clickX,
+      clickY,
+      rect.width,
+      rect.height,
+    )
+
+    setPendingCoordinates({ xRatio, yRatio })
+    setDialogOpen(true)
+  }
+
+  const handleSubmitDot = async (name: string) => {
+    if (pendingCoordinates) {
+      await addDot(
+        category.id,
+        name,
+        pendingCoordinates.xRatio,
+        pendingCoordinates.yRatio,
+      )
+      setPendingCoordinates(null)
+    }
+  }
 
   return (
     <div className="flex min-h-[300px] flex-col rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -36,7 +74,10 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
       </div>
 
       {/* Dot display area */}
-      <div className="relative flex-1 p-4">
+      <div
+        className="relative flex-1 cursor-pointer p-4"
+        onClick={handleAreaClick}
+      >
         {categoryDots.map((dot) => (
           <div
             key={dot.id}
@@ -67,6 +108,13 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
           </div>
         ))}
       </div>
+
+      <AddDotDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        categoryTitle={category.title}
+        onSubmit={handleSubmitDot}
+      />
     </div>
   )
 }
