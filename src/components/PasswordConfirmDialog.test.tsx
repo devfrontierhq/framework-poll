@@ -96,6 +96,33 @@ describe('PasswordConfirmDialog', () => {
     })
   })
 
+  it('passes raw password input to onConfirm and leaves trimming to the verifier', async () => {
+    const user = userEvent.setup()
+    mockOnConfirm.mockResolvedValue(undefined)
+
+    render(
+      <PasswordConfirmDialog
+        open={true}
+        onOpenChange={mockOnOpenChange}
+        title="測試標題"
+        description="測試描述"
+        itemName="測試項目"
+        onConfirm={mockOnConfirm}
+        successMessage="成功訊息"
+      />,
+    )
+
+    const passwordInput = screen.getByLabelText('請輸入管理員密碼以確認刪除')
+    const submitButton = screen.getByRole('button', { name: '確認刪除' })
+
+    await user.type(passwordInput, ' secret ')
+    await user.click(submitButton)
+
+    await waitFor(() => {
+      expect(mockOnConfirm).toHaveBeenCalledWith(' secret ')
+    })
+  })
+
   it('uses custom error message prefix', async () => {
     const user = userEvent.setup()
     mockOnConfirm.mockRejectedValue(new Error('操作失敗'))

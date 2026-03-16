@@ -55,15 +55,14 @@ export function PasswordConfirmDialog({
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const trimmedPassword = password.trim()
 
-    if (!trimmedPassword || isSubmitting) {
+    if (!password.trim() || isSubmitting) {
       return
     }
 
     try {
       setIsSubmitting(true)
-      await onConfirm(trimmedPassword)
+      await onConfirm(password)
       toast.success(successMessage)
       closeDialog()
     } catch (error) {

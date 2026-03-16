@@ -14,6 +14,11 @@ The system SHALL verify admin password from environment variable.
 - **THEN** the system SHALL NOT enable admin mode
 - **THEN** the system SHALL display an error message
 
+#### Scenario: Ignore leading and trailing whitespace during verification
+- **WHEN** a user enters the correct admin password with leading or trailing whitespace
+- **THEN** the system SHALL trim the user input before verification
+- **THEN** the system SHALL treat VITE_ADMIN_SECRET as a trimmed value for comparison
+
 ### Requirement: Admin mode UI state
 
 The system SHALL maintain admin mode as a UI state, not a separate page.

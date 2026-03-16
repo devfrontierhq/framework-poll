@@ -37,15 +37,14 @@ export function AdminUnlockDialog({
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const trimmedPassword = password.trim()
 
-    if (!trimmedPassword || isSubmitting) {
+    if (!password.trim() || isSubmitting) {
       return
     }
 
     try {
       setIsSubmitting(true)
-      const isValid = unlockAdmin(trimmedPassword)
+      const isValid = unlockAdmin(password)
 
       if (isValid) {
         toast.success('管理員模式已啟用')

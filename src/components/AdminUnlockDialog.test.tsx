@@ -67,6 +67,23 @@ describe('AdminUnlockDialog', () => {
     })
   })
 
+  it('passes raw password input to unlockAdmin and leaves trimming to the store', async () => {
+    const user = userEvent.setup()
+    mockUnlockAdmin.mockReturnValue(true)
+
+    render(<AdminUnlockDialog open={true} onOpenChange={mockOnOpenChange} />)
+
+    const passwordInput = screen.getByPlaceholderText('輸入管理員密碼')
+    const submitButton = screen.getByRole('button', { name: '解鎖' })
+
+    await user.type(passwordInput, ' secret ')
+    await user.click(submitButton)
+
+    await waitFor(() => {
+      expect(mockUnlockAdmin).toHaveBeenCalledWith(' secret ')
+    })
+  })
+
   it('disables submit button when password is empty', () => {
     render(<AdminUnlockDialog open={true} onOpenChange={mockOnOpenChange} />)
 
