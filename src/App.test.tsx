@@ -111,7 +111,7 @@ describe('App', () => {
       screen.queryByRole('button', { name: /新增版塊/ }),
     ).not.toBeInTheDocument()
     expect(
-      screen.queryByRole('button', { name: /鎖定/ }),
+      screen.queryByRole('button', { name: /退出/ }),
     ).not.toBeInTheDocument()
   })
 
@@ -128,7 +128,7 @@ describe('App', () => {
     render(<App />)
 
     expect(screen.getByRole('button', { name: /新增版塊/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /鎖定/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /退出/ })).toBeInTheDocument()
     expect(
       screen.queryByRole('button', { name: /管理模式/ }),
     ).not.toBeInTheDocument()
@@ -168,7 +168,7 @@ describe('App', () => {
 
     render(<App />)
 
-    const lockButton = screen.getByRole('button', { name: /鎖定/ })
+    const lockButton = screen.getByRole('button', { name: /退出/ })
     await user.click(lockButton)
 
     expect(lockAdminMock).toHaveBeenCalledOnce()
