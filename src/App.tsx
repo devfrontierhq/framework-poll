@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import { Unlock, Plus } from 'lucide-react'
 
 import { useDotBoardStore } from '@/store/dotBoardStore'
 import {
@@ -8,23 +9,45 @@ import {
   selectCategoryCount,
 } from '@/store/selectors'
 
+import { Button } from '@/components/ui/button'
+
 import { EmptyState } from '@/components/EmptyState'
 import { CategoryGrid } from '@/components/CategoryGrid'
+import { AdminUnlockDialog } from '@/components/AdminUnlockDialog'
+import { CategoryDialog } from '@/components/CategoryDialog'
 
 function App() {
+  const [showAdminUnlockDialog, setShowAdminUnlockDialog] = useState(false)
+  const [showAddCategoryDialog, setShowAddCategoryDialog] = useState(false)
+
   const loadData = useDotBoardStore((state) => state.loadData)
+  const lockAdmin = useDotBoardStore((state) => state.lockAdmin)
   const categoryCount = useDotBoardStore(selectCategoryCount)
 
   const categoryList = useDotBoardStore(selectCategoryList)
   const dotsByCategory = useDotBoardStore(selectDotsByCategory)
 
-  const { isInitialized, isLoading, loadError } = useDotBoardStore(
-    useShallow((state) => ({
-      isInitialized: state.isInitialized,
-      isLoading: state.isLoading,
-      loadError: state.loadError,
-    })),
-  )
+  const { isInitialized, isLoading, loadError, isAdminUnlocked } =
+    useDotBoardStore(
+      useShallow((state) => ({
+        isInitialized: state.isInitialized,
+        isLoading: state.isLoading,
+        loadError: state.loadError,
+        isAdminUnlocked: state.isAdminUnlocked,
+      })),
+    )
+
+  const handleUnlockClick = () => {
+    setShowAdminUnlockDialog(true)
+  }
+
+  const handleLockClick = () => {
+    lockAdmin()
+  }
+
+  const handleAddCategoryClick = () => {
+    setShowAddCategoryDialog(true)
+  }
 
   useEffect(() => {
     loadData()
@@ -60,19 +83,69 @@ function App() {
   }
 
   return (
-    <main className="h-screen bg-slate-50 px-6 py-16">
-      <div className="mx-auto flex h-full max-w-6xl flex-col gap-10">
+    <main className="h-screen bg-slate-50">
+      {isAdminUnlocked && (
+        <div className="relative flex h-12 items-center justify-center bg-amber-50 px-6 text-sm font-medium text-amber-900">
+          <span>管理模式已啟用</span>
+          <Button
+            onClick={handleLockClick}
+            variant="outline"
+            size="sm"
+            className="absolute right-6"
+          >
+            退出
+          </Button>
+        </div>
+      )}
+
+      <div
+        className={`mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16 ${
+          isAdminUnlocked ? 'h-[calc(100vh-3rem)]' : 'h-full'
+        }`}
+      >
         <header className="text-center">
-          <h1 className="text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
-            Framework Poll
-          </h1>
-          <p className="mt-4 text-lg text-slate-700">快速登記你使用的框架</p>
+          <div className="flex flex-col items-center gap-6 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-4">
+            <div className="hidden sm:block" />
+            <div className="w-full sm:max-w-none">
+              <h1 className="text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
+                Framework Poll
+              </h1>
+              <p className="mt-4 text-lg text-slate-700">
+                快來登記你使用的框架
+              </p>
+            </div>
+            <div className="flex w-full justify-center gap-2 sm:justify-end">
+              {isAdminUnlocked ? (
+                <Button
+                  onClick={handleAddCategoryClick}
+                  variant="default"
+                  size="sm"
+                >
+                  <Plus className="h-4 w-4" />
+                  新增版塊
+                </Button>
+              ) : (
+                <Button onClick={handleUnlockClick} variant="outline" size="sm">
+                  <Unlock className="h-4 w-4" />
+                  管理模式
+                </Button>
+              )}
+            </div>
+          </div>
         </header>
 
         <div className="flex-1">{renderContent()}</div>
-
-        {/* TODO: Add admin controls */}
       </div>
+
+      <AdminUnlockDialog
+        open={showAdminUnlockDialog}
+        onOpenChange={setShowAdminUnlockDialog}
+      />
+      <CategoryDialog
+        mode="add"
+        open={showAddCategoryDialog}
+        onOpenChange={setShowAddCategoryDialog}
+      />
     </main>
   )
 }

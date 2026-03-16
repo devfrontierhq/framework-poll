@@ -12,13 +12,14 @@ export const createAuthSlice: StateCreator<DotBoardStore, [], [], AuthSlice> = (
   isAdminUnlocked: false,
 
   verifyAdminPassword: (password: string) => {
-    const adminSecret = getAdminSecret()
+    const adminSecret = getAdminSecret()?.trim()
+    const normalizedPassword = password.trim()
 
-    if (!adminSecret || !password) {
+    if (!adminSecret || !normalizedPassword) {
       return false
     }
 
-    return password === adminSecret
+    return normalizedPassword === adminSecret
   },
 
   unlockAdmin: (password: string) => {

@@ -71,13 +71,17 @@ The system SHALL allow administrators to soft-delete categories after confirming
 
 The system SHALL display all non-deleted categories in a responsive grid layout.
 
-#### Scenario: Desktop layout
-- **WHEN** the viewport width is greater than or equal to 1024px
-- **THEN** the system displays categories in a 3-column grid
+#### Scenario: Desktop and tablet layout without overflow
+- **WHEN** the viewport width is greater than or equal to 768px
+- **AND** there are 3 or fewer categories
+- **THEN** the system displays categories in a 3-column layout
+- **AND** the container SHALL NOT require horizontal scrolling
 
-#### Scenario: Tablet layout
-- **WHEN** the viewport width is between 768px and 1023px
-- **THEN** the system displays categories in a 3-column grid
+#### Scenario: Desktop and tablet layout with horizontal scroll
+- **WHEN** the viewport width is greater than or equal to 768px
+- **AND** there are more than 3 categories
+- **THEN** the system displays categories in fixed-width columns (320px per column)
+- **AND** the container enables horizontal scrolling
 
 #### Scenario: Mobile layout
 - **WHEN** the viewport width is less than 768px

@@ -92,8 +92,15 @@ describe('Admin Password Verification Logic', () => {
       expect(store.verifyAdminPassword('MYSECRET123')).toBe(false)
 
       // Whitespace matters
-      expect(store.verifyAdminPassword('MySecret123 ')).toBe(false)
-      expect(store.verifyAdminPassword(' MySecret123')).toBe(false)
+      expect(store.verifyAdminPassword('MySecret123 ')).toBe(true)
+      expect(store.verifyAdminPassword(' MySecret123')).toBe(true)
+    })
+
+    it('should trim both password input and admin secret before comparison', () => {
+      mockGetAdminSecret.mockReturnValue('  MySecret123  ')
+
+      expect(store.verifyAdminPassword(' MySecret123 ')).toBe(true)
+      expect(store.verifyAdminPassword('WrongSecret')).toBe(false)
     })
   })
 
