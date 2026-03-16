@@ -9,7 +9,13 @@ import {
   type CategoryState,
   type CategoryActions,
 } from '../types'
-import { createCategory, updateCategory, softDeleteCategory } from '@/db'
+import {
+  createCategory,
+  getActiveDots,
+  initializeDefaultCategoriesAtomic,
+  updateCategory,
+  softDeleteCategory,
+} from '@/db'
 
 export type CategorySlice = CategoryState & CategoryActions
 
@@ -17,6 +23,12 @@ type CategoryUpdates = {
   title?: string
   color?: string
 }
+
+const DEFAULT_CATEGORIES = [
+  { title: 'React', color: '#61dafb' },
+  { title: 'Vue', color: '#42b883' },
+  { title: 'Angular', color: '#dd0031' },
+] as const
 
 function prepareNewCategoryInput(title: string, color: string) {
   const trimmedTitle = title?.trim()
@@ -75,6 +87,7 @@ export const createCategorySlice: StateCreator<
   CategorySlice
 > = (set, get) => ({
   categories: new Map(),
+  isSeedingDefaultCategories: false,
 
   addCategory: async (title: string, color: string) => {
     if (!get().isAdminUnlocked) {
@@ -153,5 +166,37 @@ export const createCategorySlice: StateCreator<
     )
 
     return deletedCategory
+  },
+
+  initializeDefaultCategories: async () => {
+    if (get().isSeedingDefaultCategories) {
+      return
+    }
+
+    try {
+      set({ isSeedingDefaultCategories: true })
+
+      // Finish the category bootstrap transaction before reading dots so a
+      // stale tab cannot overwrite newer votes with an older dots snapshot.
+      const categories = await initializeDefaultCategoriesAtomic(
+        DEFAULT_CATEGORIES.map(({ title, color }) =>
+          prepareNewCategoryInput(title, color),
+        ),
+      )
+
+      set({
+        categories: new Map(
+          categories.map((category) => [category.id, category]),
+        ),
+      })
+
+      const dots = await getActiveDots()
+
+      set({
+        dots: new Map(dots.map((dot) => [dot.id, dot])),
+      })
+    } finally {
+      set({ isSeedingDefaultCategories: false })
+    }
   },
 })

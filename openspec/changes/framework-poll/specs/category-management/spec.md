@@ -13,6 +13,22 @@ The system SHALL allow administrators to create new categories with a title and 
 - **WHEN** a non-admin user attempts to access the create category function
 - **THEN** the system SHALL NOT display the create category button
 
+### Requirement: Empty state default category initialization
+
+The system SHALL allow a one-time bootstrap action to create the default framework categories when no active categories exist.
+
+#### Scenario: Initialize default categories from empty state
+- **WHEN** the application has zero active categories
+- **THEN** the system SHALL display an empty state action for creating the default framework categories
+- **WHEN** any user activates that action
+- **THEN** the system SHALL create exactly three categories: React, Vue, and Angular
+- **THEN** the categories SHALL use the predefined colors "#61dafb", "#42b883", and "#dd0031"
+
+#### Scenario: Default initialization is not general category management
+- **WHEN** default categories have been initialized or any active category already exists
+- **THEN** the system SHALL NOT expose the empty state initialization action
+- **THEN** non-admin users SHALL still NOT gain access to the general create category function
+
 ### Requirement: Edit category
 
 The system SHALL allow administrators to edit category title and color without re-entering admin password.
@@ -57,20 +73,24 @@ The system SHALL display all non-deleted categories in a responsive grid layout.
 
 #### Scenario: Desktop layout
 - **WHEN** the viewport width is greater than or equal to 1024px
-- **THEN** the system displays categories in a 4-column grid
+- **THEN** the system displays categories in a 3-column grid
 
 #### Scenario: Tablet layout
 - **WHEN** the viewport width is between 768px and 1023px
-- **THEN** the system displays categories in a 2-column grid
+- **THEN** the system displays categories in a 3-column grid
 
 #### Scenario: Mobile layout
 - **WHEN** the viewport width is less than 768px
 - **THEN** the system displays categories in a 1-column layout
 
-#### Scenario: Show dot count
-- **WHEN** a category is displayed
+#### Scenario: Show dot count in admin mode
+- **WHEN** a category is displayed in admin mode
 - **THEN** the system shows the category title and the count of non-deleted dots
 - **THEN** the count format MUST be "Title - Count" (e.g., "React - 12")
+
+#### Scenario: Hide dot count for non-admin
+- **WHEN** a category is displayed without admin mode
+- **THEN** the system shows only the category title without the count
 
 ### Requirement: Store category color
 

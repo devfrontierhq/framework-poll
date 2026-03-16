@@ -13,10 +13,17 @@ export type AuthState = {
 
 export type CategoryState = {
   categories: Map<string, Category>
+  isSeedingDefaultCategories: boolean
 }
 
 export type DotState = {
   dots: Map<string, Dot>
+}
+
+export type DataState = {
+  isInitialized: boolean
+  isLoading: boolean
+  loadError: string | null
 }
 
 // Action types
@@ -36,6 +43,7 @@ export type CategoryActions = {
     categoryId: string,
     password: string,
   ) => Promise<Category | undefined>
+  initializeDefaultCategories: () => Promise<void>
 }
 
 export type DotActions = {
@@ -60,6 +68,7 @@ export type ExportActions = {
 export type DotBoardStore = AuthState &
   CategoryState &
   DotState &
+  DataState &
   AuthActions &
   CategoryActions &
   DotActions &

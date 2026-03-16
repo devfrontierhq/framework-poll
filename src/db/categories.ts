@@ -12,23 +12,14 @@ import {
 } from '@/db/schema'
 import { getTimestamp, omitUndefinedFields, withDbError } from '@/db/utils'
 
+function normalizeCategoryTitle(title: string) {
+  return title.trim().toLowerCase()
+}
+
 export async function createCategory(
   input: CreateCategoryInput,
 ): Promise<Category> {
-  if (!isValidHexColor(input.color)) {
-    throw new DotBoardDataError(
-      `Invalid color format: ${input.color}. Must be hex format (#RRGGBB).`,
-    )
-  }
-
-  const category: Category = {
-    id: createId(),
-    title: input.title,
-    color: input.color,
-    createdAt: getTimestamp(),
-    deletedAt: null,
-    isDeleted: 0,
-  }
+  const category = buildCategory(input)
 
   const database = await getDb()
   await withDbError('create category', () =>
@@ -36,6 +27,80 @@ export async function createCategory(
   )
 
   return category
+}
+
+/**
+ * Use this for workflows that create multiple categories as a single unit.
+ * If any add fails, IndexedDB rolls back the whole transaction so callers
+ * do not end up with partially persisted categories.
+ */
+export async function createCategoriesAtomic(
+  inputs: CreateCategoryInput[],
+): Promise<Category[]> {
+  return withDbError('create categories', async () => {
+    const categories = inputs.map(buildCategory)
+
+    const database = await getDb()
+    const transaction = database.transaction(
+      STORE_NAMES.categories,
+      'readwrite',
+    )
+    const categoriesStore = transaction.objectStore(STORE_NAMES.categories)
+
+    for (const category of categories) {
+      await categoriesStore.add(category)
+    }
+
+    await transaction.done
+    return categories
+  })
+}
+
+/**
+ * Bootstrap default categories only when there are currently zero active
+ * categories. Read + optional create happens inside one transaction so stale
+ * tabs cannot append defaults onto a board that is no longer empty.
+ */
+export async function initializeDefaultCategoriesAtomic(
+  inputs: CreateCategoryInput[],
+): Promise<Category[]> {
+  return withDbError('initialize default categories', async () => {
+    const database = await getDb()
+    const transaction = database.transaction(
+      STORE_NAMES.categories,
+      'readwrite',
+    )
+    const categoriesStore = transaction.objectStore(STORE_NAMES.categories)
+    const activeCategories = await categoriesStore
+      .index(INDEX_NAMES.categories.isDeleted)
+      .getAll(0)
+    const activeTitles = new Set(
+      activeCategories.map((category) =>
+        normalizeCategoryTitle(category.title),
+      ),
+    )
+
+    if (activeCategories.length > 0) {
+      await transaction.done
+      return activeCategories
+    }
+
+    for (const input of inputs) {
+      const normalizedTitle = normalizeCategoryTitle(input.title)
+
+      if (activeTitles.has(normalizedTitle)) {
+        continue
+      }
+
+      const category = buildCategory(input)
+      await categoriesStore.add(category)
+      activeCategories.push(category)
+      activeTitles.add(normalizedTitle)
+    }
+
+    await transaction.done
+    return activeCategories
+  })
 }
 
 export async function getCategory(categoryId: Category['id']) {
@@ -61,6 +126,23 @@ export async function getAllCategories() {
   return withDbError('read all categories', () =>
     database.getAll(STORE_NAMES.categories),
   )
+}
+
+function buildCategory(input: CreateCategoryInput): Category {
+  if (!isValidHexColor(input.color)) {
+    throw new DotBoardDataError(
+      `Invalid color format: ${input.color}. Must be hex format (#RRGGBB).`,
+    )
+  }
+
+  return {
+    id: createId(),
+    title: input.title,
+    color: input.color,
+    createdAt: getTimestamp(),
+    deletedAt: null,
+    isDeleted: 0,
+  }
 }
 
 export async function updateCategory(
