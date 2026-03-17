@@ -24,71 +24,111 @@ describe('CategoryDialog', () => {
     beforeEach(() => {
       vi.mocked(useDotBoardStore).mockReturnValue(mockAddCategory)
     })
+
     it('renders add category dialog with correct elements', () => {
-      render(
-        <CategoryDialog
-          mode="add"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-        />,
-      )
+      render(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
 
       expect(screen.getByText('新增版塊')).toBeInTheDocument()
       expect(screen.getByText('建立一個新的框架版塊')).toBeInTheDocument()
-      expect(screen.getByLabelText('版塊名稱')).toBeInTheDocument()
-      expect(screen.getByLabelText('版塊顏色')).toBeInTheDocument()
+      // Multi-row mode: title input is a placeholder-based input
+      expect(screen.getByPlaceholderText('版塊名稱')).toBeInTheDocument()
+      expect(document.querySelector('input[type="color"]')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: '取消' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: '確認' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: '新增一筆' })).toBeInTheDocument()
     })
 
-    it('creates category with title and color', async () => {
+    it('creates category with title and color (single row)', async () => {
       const user = userEvent.setup()
       mockAddCategory.mockResolvedValue(undefined)
 
-      render(
-        <CategoryDialog
-          mode="add"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-        />,
-      )
+      render(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
 
-      const titleInput = screen.getByLabelText('版塊名稱')
-      const colorInputs = screen.getAllByDisplayValue('#3b82f6')
-      const submitButton = screen.getByRole('button', { name: '確認' })
-
-      await user.clear(titleInput)
+      const titleInput = screen.getByPlaceholderText('版塊名稱')
       await user.type(titleInput, 'React')
 
-      // Find the text input for color (not the color picker)
-      const colorTextInput = colorInputs.find(
-        (input) => input.getAttribute('type') !== 'color',
-      )
-      if (colorTextInput) {
-        await user.clear(colorTextInput)
-        await user.type(colorTextInput, '#61dafb')
-      }
-
+      const submitButton = screen.getByRole('button', { name: '確認' })
       await user.click(submitButton)
 
       await waitFor(() => {
-        expect(mockAddCategory).toHaveBeenCalledWith('React', '#61dafb')
+        expect(mockAddCategory).toHaveBeenCalledWith('React', '#3b82f6')
         expect(toast.success).toHaveBeenCalledWith('版塊已新增：React')
         expect(mockOnOpenChange).toHaveBeenCalledWith(false)
       })
     })
 
-    it('disables submit button when title is empty', () => {
-      render(
-        <CategoryDialog
-          mode="add"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-        />,
-      )
+    it('creates multiple categories in batch', async () => {
+      const user = userEvent.setup()
+      mockAddCategory.mockResolvedValue(undefined)
+
+      render(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
+
+      // Fill first row
+      const firstTitleInput = screen.getByPlaceholderText('版塊名稱')
+      await user.type(firstTitleInput, 'React')
+
+      // Add second row
+      await user.click(screen.getByRole('button', { name: '新增一筆' }))
+
+      const titleInputs = screen.getAllByPlaceholderText('版塊名稱')
+      expect(titleInputs).toHaveLength(2)
+      await user.type(titleInputs[1], 'Vue')
+
+      await user.click(screen.getByRole('button', { name: '確認' }))
+
+      await waitFor(() => {
+        expect(mockAddCategory).toHaveBeenCalledTimes(2)
+        expect(mockAddCategory).toHaveBeenNthCalledWith(1, 'React', '#3b82f6')
+        expect(mockAddCategory).toHaveBeenNthCalledWith(2, 'Vue', '#3b82f6')
+        expect(toast.success).toHaveBeenCalledWith('版塊已新增：React、Vue')
+        expect(mockOnOpenChange).toHaveBeenCalledWith(false)
+      })
+    })
+
+    it('filters out rows with empty titles on submit', async () => {
+      const user = userEvent.setup()
+      mockAddCategory.mockResolvedValue(undefined)
+
+      render(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
+
+      // Fill first row
+      await user.type(screen.getByPlaceholderText('版塊名稱'), 'React')
+
+      // Add second row (leave empty)
+      await user.click(screen.getByRole('button', { name: '新增一筆' }))
+
+      // Add third row and fill
+      await user.click(screen.getByRole('button', { name: '新增一筆' }))
+      const titleInputs = screen.getAllByPlaceholderText('版塊名稱')
+      await user.type(titleInputs[2], 'Angular')
+
+      await user.click(screen.getByRole('button', { name: '確認' }))
+
+      await waitFor(() => {
+        expect(mockAddCategory).toHaveBeenCalledTimes(2)
+        expect(mockAddCategory).toHaveBeenCalledWith('React', '#3b82f6')
+        expect(mockAddCategory).toHaveBeenCalledWith('Angular', '#3b82f6')
+        expect(mockOnOpenChange).toHaveBeenCalledWith(false)
+      })
+    })
+
+    it('disables submit button when all titles are empty', () => {
+      render(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
 
       const submitButton = screen.getByRole('button', { name: '確認' })
       expect(submitButton).toBeDisabled()
+    })
+
+    it('enables submit button when at least one row has a title', async () => {
+      const user = userEvent.setup()
+
+      render(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
+
+      const titleInput = screen.getByPlaceholderText('版塊名稱')
+      await user.type(titleInput, 'React')
+
+      const submitButton = screen.getByRole('button', { name: '確認' })
+      expect(submitButton).not.toBeDisabled()
     })
 
     it('shows error message when category creation fails', async () => {
@@ -96,18 +136,12 @@ describe('CategoryDialog', () => {
       const errorMessage = '版塊名稱重複'
       mockAddCategory.mockRejectedValue(new Error(errorMessage))
 
-      render(
-        <CategoryDialog
-          mode="add"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-        />,
-      )
+      render(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
 
-      const titleInput = screen.getByLabelText('版塊名稱')
-      const submitButton = screen.getByRole('button', { name: '確認' })
-
+      const titleInput = screen.getByPlaceholderText('版塊名稱')
       await user.type(titleInput, 'React')
+
+      const submitButton = screen.getByRole('button', { name: '確認' })
       await user.click(submitButton)
 
       await waitFor(() => {
@@ -116,79 +150,100 @@ describe('CategoryDialog', () => {
       })
     })
 
-    it('clears inputs when dialog is closed', async () => {
+    it('clears inputs when dialog is closed and reopened', async () => {
       const user = userEvent.setup()
 
-      render(
-        <CategoryDialog
-          mode="add"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-        />,
-      )
+      const { rerender } = render(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
 
-      const titleInput = screen.getByLabelText('版塊名稱')
-      const cancelButton = screen.getByRole('button', { name: '取消' })
-
+      const titleInput = screen.getByPlaceholderText('版塊名稱')
       await user.type(titleInput, 'React')
+
+      const cancelButton = screen.getByRole('button', { name: '取消' })
       await user.click(cancelButton)
 
       expect(mockOnOpenChange).toHaveBeenCalledWith(false)
+
+      // Reopen
+      rerender(<CategoryDialog mode="add" open={false} onOpenChange={mockOnOpenChange} />)
+      rerender(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
+
+      expect(screen.getByPlaceholderText('版塊名稱')).toHaveValue('')
     })
 
     it('uses default color #3b82f6', () => {
-      render(
-        <CategoryDialog
-          mode="add"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-        />,
-      )
+      render(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
 
-      const colorInputs = screen.getAllByDisplayValue('#3b82f6')
-      expect(colorInputs.length).toBeGreaterThan(0)
-    })
-
-    it('syncs color between color picker and text input', async () => {
-      const user = userEvent.setup()
-
-      render(
-        <CategoryDialog
-          mode="add"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-        />,
-      )
-
-      // Find the color picker input
       const colorPicker = document.querySelector('input[type="color"]')
-      expect(colorPicker).toBeInTheDocument()
-
-      if (colorPicker) {
-        await user.click(colorPicker)
-        // Color picker interaction is limited in tests, but we verify it exists
-        expect(colorPicker).toHaveValue('#3b82f6')
-      }
+      expect(colorPicker).toHaveValue('#3b82f6')
     })
 
     it('prevents submission with whitespace-only title', async () => {
       const user = userEvent.setup()
 
-      render(
-        <CategoryDialog
-          mode="add"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-        />,
-      )
+      render(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
 
-      const titleInput = screen.getByLabelText('版塊名稱')
-      const submitButton = screen.getByRole('button', { name: '確認' })
-
+      const titleInput = screen.getByPlaceholderText('版塊名稱')
       await user.type(titleInput, '   ')
 
-      // Submit button should still be disabled for whitespace
+      const submitButton = screen.getByRole('button', { name: '確認' })
       expect(submitButton).toBeDisabled()
+    })
+  })
+
+  describe('Add Mode - Row Management', () => {
+    beforeEach(() => {
+      vi.mocked(useDotBoardStore).mockReturnValue(mockAddCategory)
+    })
+
+    it('starts with one row', () => {
+      render(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
+
+      expect(screen.getAllByPlaceholderText('版塊名稱')).toHaveLength(1)
+    })
+
+    it('adds a row when clicking the add row button', async () => {
+      const user = userEvent.setup()
+
+      render(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
+
+      await user.click(screen.getByRole('button', { name: '新增一筆' }))
+
+      expect(screen.getAllByPlaceholderText('版塊名稱')).toHaveLength(2)
+    })
+
+    it('does not show remove button when only one row', () => {
+      render(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
+
+      expect(screen.queryByRole('button', { name: /刪除第/ })).not.toBeInTheDocument()
+    })
+
+    it('shows remove button when there are 2 or more rows', async () => {
+      const user = userEvent.setup()
+
+      render(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
+
+      await user.click(screen.getByRole('button', { name: '新增一筆' }))
+
+      const removeButtons = screen.getAllByRole('button', { name: /刪除第/ })
+      expect(removeButtons).toHaveLength(2)
+    })
+
+    it('removes a row when clicking delete button', async () => {
+      const user = userEvent.setup()
+
+      render(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
+
+      // Add a second row
+      await user.click(screen.getByRole('button', { name: '新增一筆' }))
+      expect(screen.getAllByPlaceholderText('版塊名稱')).toHaveLength(2)
+
+      // Remove first row
+      const removeButtons = screen.getAllByRole('button', { name: /刪除第/ })
+      await user.click(removeButtons[0])
+
+      expect(screen.getAllByPlaceholderText('版塊名稱')).toHaveLength(1)
+      // No more remove buttons since only 1 row remains
+      expect(screen.queryByRole('button', { name: /刪除第/ })).not.toBeInTheDocument()
     })
   })
 
@@ -200,14 +255,7 @@ describe('CategoryDialog', () => {
     })
 
     it('renders edit category dialog with correct elements', () => {
-      render(
-        <CategoryDialog
-          mode="edit"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          category={mockCategory}
-        />,
-      )
+      render(<CategoryDialog mode="edit" open={true} onOpenChange={mockOnOpenChange} category={mockCategory} />)
 
       expect(screen.getByText('編輯版塊')).toBeInTheDocument()
       expect(screen.getByText('修改版塊的標題與顏色')).toBeInTheDocument()
@@ -218,14 +266,7 @@ describe('CategoryDialog', () => {
     })
 
     it('populates form with category data', () => {
-      render(
-        <CategoryDialog
-          mode="edit"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          category={mockCategory}
-        />,
-      )
+      render(<CategoryDialog mode="edit" open={true} onOpenChange={mockOnOpenChange} category={mockCategory} />)
 
       const titleInput = screen.getByLabelText('版塊名稱')
       expect(titleInput).toHaveValue('React')
@@ -244,14 +285,7 @@ describe('CategoryDialog', () => {
         }),
       )
 
-      render(
-        <CategoryDialog
-          mode="edit"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          category={mockCategory}
-        />,
-      )
+      render(<CategoryDialog mode="edit" open={true} onOpenChange={mockOnOpenChange} category={mockCategory} />)
 
       const titleInput = screen.getByLabelText('版塊名稱')
       const colorInputs = screen.getAllByDisplayValue('#61dafb')
@@ -261,9 +295,7 @@ describe('CategoryDialog', () => {
       await user.type(titleInput, 'React v18')
 
       // Find the text input for color (not the color picker)
-      const colorTextInput = colorInputs.find(
-        (input) => input.getAttribute('type') !== 'color',
-      )
+      const colorTextInput = colorInputs.find((input) => input.getAttribute('type') !== 'color')
       if (colorTextInput) {
         await user.clear(colorTextInput)
         await user.type(colorTextInput, '#58c4dc')
@@ -284,14 +316,7 @@ describe('CategoryDialog', () => {
     it('disables submit button when title is empty', async () => {
       const user = userEvent.setup()
 
-      render(
-        <CategoryDialog
-          mode="edit"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          category={mockCategory}
-        />,
-      )
+      render(<CategoryDialog mode="edit" open={true} onOpenChange={mockOnOpenChange} category={mockCategory} />)
 
       const titleInput = screen.getByLabelText('版塊名稱')
       const submitButton = screen.getByRole('button', { name: '確認' })
@@ -306,14 +331,7 @@ describe('CategoryDialog', () => {
       const errorMessage = '版塊名稱重複'
       mockEditCategory.mockRejectedValue(new Error(errorMessage))
 
-      render(
-        <CategoryDialog
-          mode="edit"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          category={mockCategory}
-        />,
-      )
+      render(<CategoryDialog mode="edit" open={true} onOpenChange={mockOnOpenChange} category={mockCategory} />)
 
       const titleInput = screen.getByLabelText('版塊名稱')
       const submitButton = screen.getByRole('button', { name: '確認' })
@@ -332,14 +350,7 @@ describe('CategoryDialog', () => {
       const user = userEvent.setup()
       mockEditCategory.mockResolvedValue(undefined)
 
-      render(
-        <CategoryDialog
-          mode="edit"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          category={mockCategory}
-        />,
-      )
+      render(<CategoryDialog mode="edit" open={true} onOpenChange={mockOnOpenChange} category={mockCategory} />)
 
       const titleInput = screen.getByLabelText('版塊名稱')
       const submitButton = screen.getByRole('button', { name: '確認' })
@@ -349,9 +360,7 @@ describe('CategoryDialog', () => {
       await user.click(submitButton)
 
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith(
-          '更新失敗：版塊不存在或已被移除',
-        )
+        expect(toast.error).toHaveBeenCalledWith('更新失敗：版塊不存在或已被移除')
         expect(toast.success).not.toHaveBeenCalled()
         expect(mockOnOpenChange).not.toHaveBeenCalled()
       })
@@ -369,14 +378,7 @@ describe('CategoryDialog', () => {
         }),
       )
 
-      render(
-        <CategoryDialog
-          mode="edit"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          category={mockCategory}
-        />,
-      )
+      render(<CategoryDialog mode="edit" open={true} onOpenChange={mockOnOpenChange} category={mockCategory} />)
 
       const titleInput = screen.getByLabelText('版塊名稱')
       const submitButton = screen.getByRole('button', { name: '確認' })
@@ -386,9 +388,7 @@ describe('CategoryDialog', () => {
       await user.click(submitButton)
 
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith(
-          '更新失敗：版塊不存在或已被移除',
-        )
+        expect(toast.error).toHaveBeenCalledWith('更新失敗：版塊不存在或已被移除')
         expect(toast.success).not.toHaveBeenCalled()
         expect(mockOnOpenChange).not.toHaveBeenCalled()
       })
@@ -397,14 +397,7 @@ describe('CategoryDialog', () => {
     it('closes dialog on cancel', async () => {
       const user = userEvent.setup()
 
-      render(
-        <CategoryDialog
-          mode="edit"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          category={mockCategory}
-        />,
-      )
+      render(<CategoryDialog mode="edit" open={true} onOpenChange={mockOnOpenChange} category={mockCategory} />)
 
       const cancelButton = screen.getByRole('button', { name: '取消' })
       await user.click(cancelButton)
@@ -415,14 +408,7 @@ describe('CategoryDialog', () => {
     it('prevents submission with whitespace-only title', async () => {
       const user = userEvent.setup()
 
-      render(
-        <CategoryDialog
-          mode="edit"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          category={mockCategory}
-        />,
-      )
+      render(<CategoryDialog mode="edit" open={true} onOpenChange={mockOnOpenChange} category={mockCategory} />)
 
       const titleInput = screen.getByLabelText('版塊名稱')
       const submitButton = screen.getByRole('button', { name: '確認' })
@@ -436,35 +422,16 @@ describe('CategoryDialog', () => {
     it('reinitializes form data when reopened for the same category', async () => {
       const user = userEvent.setup()
       const { rerender } = render(
-        <CategoryDialog
-          mode="edit"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          category={mockCategory}
-        />,
+        <CategoryDialog mode="edit" open={true} onOpenChange={mockOnOpenChange} category={mockCategory} />,
       )
 
       const titleInput = screen.getByLabelText('版塊名稱')
       await user.clear(titleInput)
       await user.type(titleInput, 'Unsaved title')
 
-      rerender(
-        <CategoryDialog
-          mode="edit"
-          open={false}
-          onOpenChange={mockOnOpenChange}
-          category={mockCategory}
-        />,
-      )
+      rerender(<CategoryDialog mode="edit" open={false} onOpenChange={mockOnOpenChange} category={mockCategory} />)
 
-      rerender(
-        <CategoryDialog
-          mode="edit"
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          category={mockCategory}
-        />,
-      )
+      rerender(<CategoryDialog mode="edit" open={true} onOpenChange={mockOnOpenChange} category={mockCategory} />)
 
       expect(screen.getByLabelText('版塊名稱')).toHaveValue('React')
       expect(screen.getAllByDisplayValue('#61dafb').length).toBeGreaterThan(0)

@@ -42,10 +42,7 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
     if (!open) setOpenDialog('none')
   }
 
-  const handleDotClick = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    dot: Dot,
-  ) => {
+  const handleDotClick = (e: React.MouseEvent<HTMLButtonElement>, dot: Dot) => {
     if (isAdminUnlocked) {
       e.stopPropagation()
       setSelectedDot(dot)
@@ -58,12 +55,7 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
     const clickX = event.clientX - rect.left
     const clickY = event.clientY - rect.top
 
-    const { xRatio, yRatio } = calculateRelativeCoordinates(
-      clickX,
-      clickY,
-      rect.width,
-      rect.height,
-    )
+    const { xRatio, yRatio } = calculateRelativeCoordinates(clickX, clickY, rect.width, rect.height)
 
     setPendingCoordinates({ xRatio, yRatio })
     setOpenDialog('add-dot')
@@ -71,18 +63,15 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
 
   const handleSubmitDot = async (name: string) => {
     if (pendingCoordinates) {
-      await addDot(
-        category.id,
-        name,
-        pendingCoordinates.xRatio,
-        pendingCoordinates.yRatio,
-      )
+      await addDot(category.id, name, pendingCoordinates.xRatio, pendingCoordinates.yRatio)
       setPendingCoordinates(null)
     }
   }
 
   return (
-    <div className="flex min-h-[300px] flex-col rounded-lg border border-slate-200 bg-white shadow-sm md:h-full md:min-h-0">
+    <div
+      className="flex min-h-[300px] flex-col rounded-lg border border-slate-200 bg-white shadow-sm md:h-full md:min-h-0"
+    >
       {/* Header with title and optional count (admin mode only) */}
       <div className="border-b border-slate-200 p-4">
         <div className="flex items-center justify-between gap-3">
@@ -108,6 +97,7 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
                   setOpenDialog('edit')
                 }}
                 aria-label="編輯版塊"
+                title="編輯版塊"
               >
                 <Pencil className="h-4 w-4" />
               </Button>
@@ -119,6 +109,7 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
                   setOpenDialog('delete-category')
                 }}
                 aria-label="刪除版塊"
+                title="刪除版塊"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -128,10 +119,7 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
       </div>
 
       {/* Dot display area */}
-      <div
-        className="relative flex-1 cursor-pointer p-4"
-        onClick={handleAreaClick}
-      >
+      <div className="relative flex-1 cursor-pointer p-4" onClick={handleAreaClick}>
         {categoryDots.map((dot) => (
           <div
             key={dot.id}
@@ -171,7 +159,9 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
             )}
             <div
               data-testid="dot-hover-label"
-              className="pointer-events-none absolute top-0 left-1/2 z-10 -translate-x-1/2 -translate-y-full rounded-md bg-slate-950 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
+              className="pointer-events-none absolute top-0 left-1/2 z-10 -translate-x-1/2 -translate-y-full rounded-md
+                bg-slate-950 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity
+                group-hover:opacity-100"
             >
               {dot.name}
             </div>
@@ -186,19 +176,10 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
         onSubmit={handleSubmitDot}
       />
       {selectedDot && (
-        <DeleteDotDialog
-          open={openDialog === 'delete-dot'}
-          onOpenChange={handleDialogChange}
-          dot={selectedDot}
-        />
+        <DeleteDotDialog open={openDialog === 'delete-dot'} onOpenChange={handleDialogChange} dot={selectedDot} />
       )}
 
-      <CategoryDialog
-        mode="edit"
-        open={openDialog === 'edit'}
-        onOpenChange={handleDialogChange}
-        category={category}
-      />
+      <CategoryDialog mode="edit" open={openDialog === 'edit'} onOpenChange={handleDialogChange} category={category} />
       <DeleteCategoryDialog
         open={openDialog === 'delete-category'}
         onOpenChange={handleDialogChange}
