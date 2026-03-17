@@ -74,6 +74,7 @@ The system SHALL store categories with required fields.
 - **THEN** it MUST have an id field (string)
 - **THEN** it MUST have a title field (string)
 - **THEN** it MUST have a color field (string, hex format)
+- **THEN** it MUST have a sortOrder field (number)
 - **THEN** it MUST have a createdAt field (string, ISO format)
 - **THEN** it MUST have a deletedAt field (string or null)
 - **THEN** it MUST have an isDeleted field (0 or 1)

@@ -23,6 +23,7 @@ The system SHALL allow a one-time bootstrap action to create the default framewo
 - **WHEN** any user activates that action
 - **THEN** the system SHALL create exactly three categories: React, Vue, and Angular
 - **THEN** the categories SHALL use the predefined colors "#61dafb", "#42b883", and "#dd0031"
+- **THEN** the categories SHALL be assigned sortOrder values 1, 2, and 3 respectively
 
 #### Scenario: Default initialization is not general category management
 - **WHEN** default categories have been initialized or any active category already exists
@@ -67,9 +68,29 @@ The system SHALL allow administrators to soft-delete categories after confirming
 - **WHEN** a category is deleted
 - **THEN** all dots with matching categoryId MUST be soft-deleted with the same timestamp
 
+### Requirement: Category ordering
+
+The system SHALL maintain a sortOrder for all categories to ensure consistent display order.
+
+#### Scenario: Assign sortOrder to new categories
+- **WHEN** a new category is created
+- **THEN** the system SHALL assign a sortOrder value one greater than the current maximum sortOrder
+
+#### Scenario: Default categories have fixed order
+- **WHEN** default categories are initialized
+- **THEN** React SHALL have sortOrder 1
+- **THEN** Vue SHALL have sortOrder 2
+- **THEN** Angular SHALL have sortOrder 3
+
+#### Scenario: Categories are displayed in sortOrder
+- **WHEN** categories are retrieved for display
+- **THEN** the system SHALL order them by sortOrder in ascending order
+- **THEN** default categories (React, Vue, Angular) MUST appear first
+- **THEN** user-created categories MUST appear after default categories in creation order
+
 ### Requirement: Display categories
 
-The system SHALL display all non-deleted categories in a responsive grid layout.
+The system SHALL display all non-deleted categories in a responsive grid layout ordered by sortOrder.
 
 #### Scenario: Desktop and tablet layout without overflow
 - **WHEN** the viewport width is greater than or equal to 768px
