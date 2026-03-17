@@ -90,11 +90,16 @@ The system SHALL restrict certain operations to admin mode only.
 - **THEN** the system SHALL NOT display edit category controls
 - **THEN** the system SHALL NOT display delete category controls
 
-#### Scenario: Non-admin can initialize default categories from empty state
-- **WHEN** a non-admin user accesses the application with zero active categories
+#### Scenario: Non-admin can initialize default categories from empty state in development mode
+- **WHEN** the application is running in development mode (`import.meta.env.DEV` is true)
+- **AND** a non-admin user accesses the application with zero active categories
 - **THEN** the system MAY display a dedicated empty state action for initializing the default framework categories
 - **THEN** that action SHALL NOT unlock admin mode
 - **THEN** that action SHALL NOT expose the general category management controls
+
+#### Scenario: Initialize default categories button hidden in production
+- **WHEN** the application is NOT running in development mode
+- **THEN** the system SHALL NOT display the initialize default categories action in the empty state
 
 #### Scenario: Non-admin cannot delete dots
 - **WHEN** a non-admin user clicks on a dot

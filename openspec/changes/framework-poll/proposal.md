@@ -25,7 +25,7 @@
 
 ### Modified Capabilities
 
-(無)
+- `admin-mode`: 限制初始化預設框架板塊的按鈕，只在開發模式（`import.meta.env.DEV`）下顯示
 
 ## Impact
 

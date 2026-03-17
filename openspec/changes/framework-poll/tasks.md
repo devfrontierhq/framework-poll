@@ -71,6 +71,9 @@
 - [x] 7.2 實作 initializeDefaultCategories action 建立三大框架板塊（React #61dafb、Vue #42b883、Angular #dd0031）
 - [x] 7.3 在 EmptyState.tsx 加入「建立預設框架板塊」按鈕（只在 categories.size === 0 時顯示）
 - [x] 7.4 測試初始化功能：點擊按鈕後建立三個預設板塊，且不解鎖 admin mode、也不開放一般 category CRUD
+- [ ] 7.5 在 EmptyState.tsx 以 `import.meta.env.DEV` 條件渲染「建立預設框架板塊」按鈕，production 環境不顯示
+- [ ] 7.6 更新 EmptyState 的空狀態文字，production 環境顯示適合一般使用者的說明（例如「等待管理員建立版塊」）
+- [ ] 7.7 更新相關測試：驗證 dev 模式顯示按鈕、production 模式隱藏按鈕
 
 ## 8. 投點流程
 
