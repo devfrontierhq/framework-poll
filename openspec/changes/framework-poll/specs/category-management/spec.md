@@ -13,6 +13,33 @@ The system SHALL allow administrators to create new categories with a title and 
 - **WHEN** a non-admin user attempts to access the create category function
 - **THEN** the system SHALL NOT display the create category button
 
+### Requirement: Batch create categories
+
+The system SHALL allow administrators to create multiple categories in a single dialog interaction by adding multiple title-color rows before submitting.
+
+#### Scenario: Add a row in batch create dialog
+- **WHEN** an administrator clicks the add row button in the create category dialog
+- **THEN** the system appends a new empty row with a title input and a color picker
+
+#### Scenario: Remove a row in batch create dialog
+- **WHEN** an administrator clicks the remove button on a row
+- **AND** there are two or more rows present
+- **THEN** the system removes that row from the dialog
+
+#### Scenario: Minimum one row enforced
+- **WHEN** only one row remains in the create category dialog
+- **THEN** the system SHALL NOT display a remove button for that row
+
+#### Scenario: Successful batch creation
+- **WHEN** an administrator fills in titles and colors for all rows and submits
+- **THEN** the system creates one category for each row with the specified title and color
+- **THEN** all newly created categories appear in the category grid
+
+#### Scenario: Partial empty rows on submit
+- **WHEN** an administrator submits the dialog with one or more rows that have an empty title
+- **THEN** the system SHALL NOT create categories for rows with empty titles
+- **THEN** the system SHALL create categories for all rows with non-empty titles
+
 ### Requirement: Empty state default category initialization
 
 The system SHALL allow a one-time bootstrap action to create the default framework categories when no active categories exist.

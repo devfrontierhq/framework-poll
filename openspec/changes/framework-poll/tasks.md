@@ -95,6 +95,11 @@
 - [x] 9.7 建立 DeleteCategoryDialog.tsx 實作 delete category 與 delete operations require password：刪除版塊需要密鑰確認
 - [x] 9.8 建立 DeleteDotDialog.tsx 實作 delete dot 與 delete operations require password：刪除圓點需要密鑰確認
 - [x] 9.9 實作 non-admin user permissions：非管理員模式隱藏管理功能按鈕
+- [ ] 9.10 修改 AddCategoryDialog.tsx 改為多列模式：每列包含標題輸入與顏色選擇器
+- [ ] 9.11 實作「新增一列」按鈕，點擊後在最後追加一列空白輸入列
+- [ ] 9.12 實作「刪除列」按鈕，僅在列數 ≥ 2 時顯示，刪除對應列
+- [ ] 9.13 修改送出邏輯：過濾標題為空的列，對每列呼叫 addCategory action
+- [ ] 9.14 更新 AddCategoryDialog 相關測試：單列行為維持不變、多列批次建立、空標題列過濾
 
 ## 10. 資料匯出
 
@@ -115,3 +120,4 @@
 - [x] 11.5 測試空狀態顯示與引導文字
 - [x] 11.6 測試錯誤提示（例如密鑰錯誤）
 - [ ] 11.7 驗證所有 spec 需求都已實作完成
+
