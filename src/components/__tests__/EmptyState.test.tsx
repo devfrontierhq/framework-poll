@@ -27,25 +27,17 @@ describe('EmptyState', () => {
 
   describe('Display and Guidance Text', () => {
     it('renders empty state message and initialization button', () => {
-      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
-        selector(createMockDotBoardStore()),
-      )
+      vi.mocked(useDotBoardStore).mockImplementation((selector) => selector(createMockDotBoardStore()))
 
       const { container } = render(<EmptyState />)
 
       expect(screen.getByText('尚無版塊')).toBeInTheDocument()
-      expect(
-        screen.getByText('管理員目前還沒有建立任何版塊'),
-      ).toBeInTheDocument()
-      expect(container.querySelector('button')).toHaveTextContent(
-        '建立預設框架板塊（React、Vue、Angular）',
-      )
+      expect(screen.getByText('管理員目前還沒有建立任何版塊')).toBeInTheDocument()
+      expect(container.querySelector('button')).toHaveTextContent('建立預設框架板塊（React、Vue、Angular）')
     })
 
     it('displays correct heading text with proper styling', () => {
-      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
-        selector(createMockDotBoardStore()),
-      )
+      vi.mocked(useDotBoardStore).mockImplementation((selector) => selector(createMockDotBoardStore()))
 
       render(<EmptyState />)
 
@@ -55,9 +47,7 @@ describe('EmptyState', () => {
     })
 
     it('displays guidance text explaining the empty state', () => {
-      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
-        selector(createMockDotBoardStore()),
-      )
+      vi.mocked(useDotBoardStore).mockImplementation((selector) => selector(createMockDotBoardStore()))
 
       render(<EmptyState />)
 
@@ -67,40 +57,26 @@ describe('EmptyState', () => {
     })
 
     it('displays button with clear action description', () => {
-      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
-        selector(createMockDotBoardStore()),
-      )
+      vi.mocked(useDotBoardStore).mockImplementation((selector) => selector(createMockDotBoardStore()))
 
       render(<EmptyState />)
 
       const button = screen.getByRole('button')
-      expect(button).toHaveTextContent(
-        '建立預設框架板塊（React、Vue、Angular）',
-      )
+      expect(button).toHaveTextContent('建立預設框架板塊（React、Vue、Angular）')
       expect(button).toBeEnabled()
     })
 
     it('has proper visual hierarchy with centered layout', () => {
-      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
-        selector(createMockDotBoardStore()),
-      )
+      vi.mocked(useDotBoardStore).mockImplementation((selector) => selector(createMockDotBoardStore()))
 
       const { container } = render(<EmptyState />)
 
       const emptyStateContainer = container.firstChild as HTMLElement
-      expect(emptyStateContainer).toHaveClass(
-        'flex',
-        'flex-col',
-        'items-center',
-        'justify-center',
-        'text-center',
-      )
+      expect(emptyStateContainer).toHaveClass('flex', 'flex-col', 'items-center', 'justify-center', 'text-center')
     })
 
     it('applies proper spacing between elements', () => {
-      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
-        selector(createMockDotBoardStore()),
-      )
+      vi.mocked(useDotBoardStore).mockImplementation((selector) => selector(createMockDotBoardStore()))
 
       render(<EmptyState />)
 
@@ -112,9 +88,7 @@ describe('EmptyState', () => {
     })
 
     it('has minimum height to ensure visibility', () => {
-      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
-        selector(createMockDotBoardStore()),
-      )
+      vi.mocked(useDotBoardStore).mockImplementation((selector) => selector(createMockDotBoardStore()))
 
       const { container } = render(<EmptyState />)
 
@@ -123,18 +97,12 @@ describe('EmptyState', () => {
     })
 
     it('applies rounded corners and shadow for visual appeal', () => {
-      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
-        selector(createMockDotBoardStore()),
-      )
+      vi.mocked(useDotBoardStore).mockImplementation((selector) => selector(createMockDotBoardStore()))
 
       const { container } = render(<EmptyState />)
 
       const emptyStateContainer = container.firstChild as HTMLElement
-      expect(emptyStateContainer).toHaveClass(
-        'rounded-2xl',
-        'border',
-        'shadow-sm',
-      )
+      expect(emptyStateContainer).toHaveClass('rounded-2xl', 'border', 'shadow-sm')
     })
   })
 
@@ -151,9 +119,7 @@ describe('EmptyState', () => {
       render(<EmptyState />)
 
       const button = screen.getByRole('button')
-      expect(button).toHaveTextContent(
-        '建立預設框架板塊（React、Vue、Angular）',
-      )
+      expect(button).toHaveTextContent('建立預設框架板塊（React、Vue、Angular）')
       expect(button).toBeEnabled()
     })
 
@@ -252,9 +218,7 @@ describe('EmptyState', () => {
 
     it('handles initialization errors gracefully', async () => {
       const user = userEvent.setup()
-      const initializeDefaultCategories = vi
-        .fn()
-        .mockRejectedValue(new Error('Test error'))
+      const initializeDefaultCategories = vi.fn().mockRejectedValue(new Error('Test error'))
 
       vi.mocked(useDotBoardStore).mockImplementation((selector) =>
         selector(
@@ -284,9 +248,7 @@ describe('EmptyState', () => {
       vi.mocked(useDotBoardStore).mockImplementation((selector) =>
         selector(
           createMockDotBoardStore({
-            initializeDefaultCategories: vi
-              .fn()
-              .mockRejectedValue('String error'),
+            initializeDefaultCategories: vi.fn().mockRejectedValue('String error'),
           }),
         ),
       )
@@ -298,9 +260,7 @@ describe('EmptyState', () => {
       await user.click(button)
 
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith(
-          '建立預設板塊失敗：建立預設板塊時發生未知錯誤',
-        )
+        expect(toast.error).toHaveBeenCalledWith('建立預設板塊失敗：建立預設板塊時發生未知錯誤')
       })
     })
 
@@ -331,11 +291,52 @@ describe('EmptyState', () => {
     })
   })
 
+  describe('DEV vs Production mode', () => {
+    it('shows initialization button in dev mode', () => {
+      vi.mocked(useDotBoardStore).mockImplementation((selector) => selector(createMockDotBoardStore()))
+
+      render(<EmptyState />)
+
+      expect(screen.getByRole('button', { name: /建立預設框架板塊/ })).toBeInTheDocument()
+    })
+
+    it('hides initialization button in production mode', () => {
+      vi.stubEnv('DEV', false)
+
+      vi.mocked(useDotBoardStore).mockImplementation((selector) => selector(createMockDotBoardStore()))
+
+      render(<EmptyState />)
+
+      expect(screen.queryByRole('button')).not.toBeInTheDocument()
+
+      vi.unstubAllEnvs()
+    })
+
+    it('shows production-friendly text in production mode', () => {
+      vi.stubEnv('DEV', false)
+
+      vi.mocked(useDotBoardStore).mockImplementation((selector) => selector(createMockDotBoardStore()))
+
+      render(<EmptyState />)
+
+      expect(screen.getByText('等待管理員建立版塊')).toBeInTheDocument()
+      expect(screen.queryByText('管理員目前還沒有建立任何版塊')).not.toBeInTheDocument()
+
+      vi.unstubAllEnvs()
+    })
+
+    it('shows dev-friendly text in dev mode', () => {
+      vi.mocked(useDotBoardStore).mockImplementation((selector) => selector(createMockDotBoardStore()))
+
+      render(<EmptyState />)
+
+      expect(screen.getByText('管理員目前還沒有建立任何版塊')).toBeInTheDocument()
+    })
+  })
+
   describe('Accessibility', () => {
     it('has proper heading hierarchy', () => {
-      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
-        selector(createMockDotBoardStore()),
-      )
+      vi.mocked(useDotBoardStore).mockImplementation((selector) => selector(createMockDotBoardStore()))
 
       render(<EmptyState />)
 
@@ -344,9 +345,7 @@ describe('EmptyState', () => {
     })
 
     it('button has accessible role', () => {
-      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
-        selector(createMockDotBoardStore()),
-      )
+      vi.mocked(useDotBoardStore).mockImplementation((selector) => selector(createMockDotBoardStore()))
 
       render(<EmptyState />)
 
@@ -355,9 +354,7 @@ describe('EmptyState', () => {
     })
 
     it('button text clearly describes the action', () => {
-      vi.mocked(useDotBoardStore).mockImplementation((selector) =>
-        selector(createMockDotBoardStore()),
-      )
+      vi.mocked(useDotBoardStore).mockImplementation((selector) => selector(createMockDotBoardStore()))
 
       render(<EmptyState />)
 
