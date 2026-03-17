@@ -44,13 +44,8 @@ const { committedCategories, getDb, resetTransactionQueue } = vi.hoisted(() => {
           add: async (category) => {
             await start
 
-            if (
-              committedCategories.has(category.id) ||
-              pendingCategories.has(category.id)
-            ) {
-              failedError = new Error(
-                `A mutation operation in the transaction failed: ${category.id}`,
-              )
+            if (committedCategories.has(category.id) || pendingCategories.has(category.id)) {
+              failedError = new Error(`A mutation operation in the transaction failed: ${category.id}`)
               throw failedError
             }
 
@@ -61,9 +56,7 @@ const { committedCategories, getDb, resetTransactionQueue } = vi.hoisted(() => {
               await start
               expect(indexName).toBe('isDeleted')
 
-              return Array.from(committedCategories.values()).filter(
-                (category) => category.isDeleted === query,
-              )
+              return Array.from(committedCategories.values()).filter((category) => category.isDeleted === query)
             },
           }),
         }),
@@ -73,9 +66,7 @@ const { committedCategories, getDb, resetTransactionQueue } = vi.hoisted(() => {
       return transaction
     },
     getAllFromIndex: async () =>
-      Array.from(committedCategories.values()).filter(
-        (category) => category.isDeleted === 0,
-      ),
+      Array.from(committedCategories.values()).filter((category) => category.isDeleted === 0),
   }))
 
   return {
@@ -92,6 +83,7 @@ vi.mock('@/db/client', () => ({
 }))
 
 import {
+  createCategory,
   createCategoriesAtomic,
   initializeDefaultCategoriesAtomic,
   getActiveCategories,
@@ -107,9 +99,7 @@ describe('createCategoriesAtomic', () => {
   })
 
   it('rolls back all writes when one add fails mid-transaction', async () => {
-    vi.spyOn(idUtils, 'createId')
-      .mockReturnValueOnce('react-id')
-      .mockReturnValueOnce('react-id')
+    vi.spyOn(idUtils, 'createId').mockReturnValueOnce('react-id').mockReturnValueOnce('react-id')
 
     await expect(
       createCategoriesAtomic([
@@ -119,6 +109,28 @@ describe('createCategoriesAtomic', () => {
     ).rejects.toThrow(/create categories/i)
 
     await expect(getActiveCategories()).resolves.toEqual([])
+  })
+})
+
+describe('createCategory', () => {
+  beforeEach(() => {
+    committedCategories.clear()
+    resetTransactionQueue()
+    getDb.mockClear()
+    vi.restoreAllMocks()
+  })
+
+  it('assigns sortOrder sequentially for concurrent callers', async () => {
+    vi.spyOn(idUtils, 'createId').mockReturnValueOnce('react-id').mockReturnValueOnce('vue-id')
+
+    const [reactCategory, vueCategory] = await Promise.all([
+      createCategory({ title: 'React', color: '#61dafb' }),
+      createCategory({ title: 'Vue', color: '#42b883' }),
+    ])
+
+    expect(reactCategory.sortOrder).toBe(1)
+    expect(vueCategory.sortOrder).toBe(2)
+    expect(Array.from(committedCategories.values()).map(({ sortOrder }) => sortOrder)).toEqual([1, 2])
   })
 })
 
@@ -147,20 +159,10 @@ describe('initializeDefaultCategoriesAtomic', () => {
       initializeDefaultCategoriesAtomic(inputs),
     ])
 
-    expect(firstResult.map(({ title }) => title)).toEqual([
-      'React',
-      'Vue',
-      'Angular',
-    ])
-    expect(secondResult.map(({ title }) => title)).toEqual([
-      'React',
-      'Vue',
-      'Angular',
-    ])
+    expect(firstResult.map(({ title }) => title)).toEqual(['React', 'Vue', 'Angular'])
+    expect(secondResult.map(({ title }) => title)).toEqual(['React', 'Vue', 'Angular'])
     expect(Array.from(committedCategories.values())).toHaveLength(3)
-    expect(
-      Array.from(committedCategories.values()).map(({ title }) => title),
-    ).toEqual(['React', 'Vue', 'Angular'])
+    expect(Array.from(committedCategories.values()).map(({ title }) => title)).toEqual(['React', 'Vue', 'Angular'])
   })
 
   it('does not append defaults when active categories already exist', async () => {
@@ -180,8 +182,6 @@ describe('initializeDefaultCategoriesAtomic', () => {
     ])
 
     expect(result.map(({ title }) => title)).toEqual(['Svelte'])
-    expect(
-      Array.from(committedCategories.values()).map(({ title }) => title),
-    ).toEqual(['Svelte'])
+    expect(Array.from(committedCategories.values()).map(({ title }) => title)).toEqual(['Svelte'])
   })
 })
