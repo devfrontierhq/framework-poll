@@ -18,13 +18,14 @@ import { CategoryDialog } from '@/components/CategoryDialog'
 import { ExportCsvButton } from '@/components/ExportCsvButton'
 
 function App() {
-  const [showAdminUnlockDialog, setShowAdminUnlockDialog] = useState(false)
-  const [showAddCategoryDialog, setShowAddCategoryDialog] = useState(false)
+  const [activeDialog, setActiveDialog] = useState<
+    'unlock' | 'addCategory' | null
+  >(null)
 
   const loadData = useDotBoardStore((state) => state.loadData)
   const lockAdmin = useDotBoardStore((state) => state.lockAdmin)
-  const categoryCount = useDotBoardStore(selectCategoryCount)
 
+  const categoryCount = useDotBoardStore(selectCategoryCount)
   const categoryList = useDotBoardStore(selectCategoryList)
   const dotsByCategory = useDotBoardStore(selectDotsByCategory)
 
@@ -38,16 +39,14 @@ function App() {
       })),
     )
 
-  const handleUnlockClick = () => {
-    setShowAdminUnlockDialog(true)
-  }
+  const closeDialog = () => setActiveDialog(null)
+
+  const handleAddCategoryClick = () => setActiveDialog('addCategory')
+  const handleUnlockClick = () => setActiveDialog('unlock')
 
   const handleLockClick = () => {
     lockAdmin()
-  }
-
-  const handleAddCategoryClick = () => {
-    setShowAddCategoryDialog(true)
+    closeDialog()
   }
 
   useEffect(() => {
@@ -142,13 +141,13 @@ function App() {
       </div>
 
       <AdminUnlockDialog
-        open={showAdminUnlockDialog}
-        onOpenChange={setShowAdminUnlockDialog}
+        open={activeDialog === 'unlock'}
+        onOpenChange={(open) => !open && closeDialog()}
       />
       <CategoryDialog
         mode="add"
-        open={showAddCategoryDialog}
-        onOpenChange={setShowAddCategoryDialog}
+        open={activeDialog === 'addCategory'}
+        onOpenChange={(open) => !open && closeDialog()}
       />
     </main>
   )
