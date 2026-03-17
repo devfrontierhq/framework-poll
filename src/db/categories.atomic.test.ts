@@ -113,8 +113,8 @@ describe('createCategoriesAtomic', () => {
 
     await expect(
       createCategoriesAtomic([
-        { title: 'React', color: '#61dafb' },
-        { title: 'Vue', color: '#42b883' },
+        { title: 'React', color: '#61dafb', sortOrder: 1 },
+        { title: 'Vue', color: '#42b883', sortOrder: 2 },
       ]),
     ).rejects.toThrow(/create categories/i)
 
@@ -137,9 +137,9 @@ describe('initializeDefaultCategoriesAtomic', () => {
       .mockReturnValueOnce('angular-id')
 
     const inputs = [
-      { title: 'React', color: '#61dafb' },
-      { title: 'Vue', color: '#42b883' },
-      { title: 'Angular', color: '#dd0031' },
+      { title: 'React', color: '#61dafb', sortOrder: 1 },
+      { title: 'Vue', color: '#42b883', sortOrder: 2 },
+      { title: 'Angular', color: '#dd0031', sortOrder: 3 },
     ]
 
     const [firstResult, secondResult] = await Promise.all([
@@ -174,9 +174,9 @@ describe('initializeDefaultCategoriesAtomic', () => {
     )
 
     const result = await initializeDefaultCategoriesAtomic([
-      { title: 'React', color: '#61dafb' },
-      { title: 'Vue', color: '#42b883' },
-      { title: 'Angular', color: '#dd0031' },
+      { title: 'React', color: '#61dafb', sortOrder: 1 },
+      { title: 'Vue', color: '#42b883', sortOrder: 2 },
+      { title: 'Angular', color: '#dd0031', sortOrder: 3 },
     ])
 
     expect(result.map(({ title }) => title)).toEqual(['Svelte'])

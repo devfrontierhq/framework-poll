@@ -16,10 +16,20 @@ function normalizeCategoryTitle(title: string) {
   return title.trim().toLowerCase()
 }
 
+async function getNextSortOrder(): Promise<number> {
+  const categories = await getActiveCategories()
+  if (categories.length === 0) {
+    return 1
+  }
+  const maxSortOrder = Math.max(...categories.map((cat) => cat.sortOrder))
+  return maxSortOrder + 1
+}
+
 export async function createCategory(
   input: CreateCategoryInput,
 ): Promise<Category> {
-  const category = buildCategory(input)
+  const sortOrder = input.sortOrder ?? (await getNextSortOrder())
+  const category = buildCategory({ ...input, sortOrder })
 
   const database = await getDb()
   await withDbError('create category', () =>
@@ -35,7 +45,7 @@ export async function createCategory(
  * do not end up with partially persisted categories.
  */
 export async function createCategoriesAtomic(
-  inputs: CreateCategoryInput[],
+  inputs: (CreateCategoryInput & { sortOrder: number })[],
 ): Promise<Category[]> {
   return withDbError('create categories', async () => {
     const categories = inputs.map(buildCategory)
@@ -62,7 +72,7 @@ export async function createCategoriesAtomic(
  * tabs cannot append defaults onto a board that is no longer empty.
  */
 export async function initializeDefaultCategoriesAtomic(
-  inputs: CreateCategoryInput[],
+  inputs: (CreateCategoryInput & { sortOrder: number })[],
 ): Promise<Category[]> {
   return withDbError('initialize default categories', async () => {
     const database = await getDb()
@@ -128,7 +138,9 @@ export async function getAllCategories() {
   )
 }
 
-function buildCategory(input: CreateCategoryInput): Category {
+function buildCategory(
+  input: CreateCategoryInput & { sortOrder: number },
+): Category {
   if (!isValidHexColor(input.color)) {
     throw new DotBoardDataError(
       `Invalid color format: ${input.color}. Must be hex format (#RRGGBB).`,
@@ -139,6 +151,7 @@ function buildCategory(input: CreateCategoryInput): Category {
     id: createId(),
     title: input.title,
     color: input.color,
+    sortOrder: input.sortOrder,
     createdAt: getTimestamp(),
     deletedAt: null,
     isDeleted: 0,

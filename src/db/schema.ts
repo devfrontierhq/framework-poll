@@ -44,7 +44,9 @@ export type DotBoardDB = DBSchema & {
   }
 }
 
-export type CreateCategoryInput = Pick<Category, 'title' | 'color'>
+export type CreateCategoryInput = Pick<Category, 'title' | 'color'> & {
+  sortOrder?: number
+}
 export type UpdateCategoryInput = Partial<Pick<Category, 'title' | 'color'>>
 export type CreateDotInput = Pick<
   Dot,

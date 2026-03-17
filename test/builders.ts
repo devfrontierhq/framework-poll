@@ -9,6 +9,7 @@ export function buildCategory(overrides: Partial<Category> = {}): Category {
     id: createId(),
     title: '測試版塊',
     color: '#3b82f6',
+    sortOrder: 1,
     createdAt: new Date().toISOString(),
     deletedAt: null,
     isDeleted: 0,

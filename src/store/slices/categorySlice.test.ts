@@ -158,6 +158,7 @@ describe('categorySlice initializeDefaultCategories', () => {
         id: 'react-id',
         title: 'React',
         color: '#61dafb',
+        sortOrder: 1,
         createdAt: new Date().toISOString(),
         deletedAt: null,
         isDeleted: 0,
@@ -175,6 +176,7 @@ describe('categorySlice initializeDefaultCategories', () => {
         id: 'svelte-id',
         title: 'Svelte',
         color: '#ff3e00',
+        sortOrder: 1,
         createdAt: new Date().toISOString(),
         deletedAt: null,
         isDeleted: 0,
@@ -185,6 +187,7 @@ describe('categorySlice initializeDefaultCategories', () => {
       id: 'stale-empty-snapshot',
       title: 'React',
       color: '#61dafb',
+      sortOrder: 1,
       createdAt: new Date().toISOString(),
       deletedAt: null,
       isDeleted: 0,
@@ -197,14 +200,17 @@ describe('categorySlice initializeDefaultCategories', () => {
       {
         title: 'React',
         color: '#61dafb',
+        sortOrder: 1,
       },
       {
         title: 'Vue',
         color: '#42b883',
+        sortOrder: 2,
       },
       {
         title: 'Angular',
         color: '#dd0031',
+        sortOrder: 3,
       },
     ])
     expect(
