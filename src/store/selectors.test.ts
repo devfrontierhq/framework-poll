@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { buildCategory, buildDot } from '@test/builders'
+import { createMockDotBoardStore } from '@test/store'
 
 import {
   selectCategoryDotCount,
@@ -8,41 +9,12 @@ import {
   selectCategoryList,
   selectDotsByCategory,
 } from './selectors'
-import type { DotBoardStore } from './types'
-
-function buildStore(overrides: Partial<DotBoardStore> = {}): DotBoardStore {
-  return {
-    categories: new Map(),
-    isSeedingDefaultCategories: false,
-    dots: new Map(),
-    isAdminUnlocked: false,
-    isInitialized: true,
-    isLoading: false,
-    loadError: null,
-    verifyAdminPassword: () => false,
-    unlockAdmin: () => false,
-    lockAdmin: () => {},
-    addCategory: async () => {
-      throw new Error('Not implemented in test')
-    },
-    editCategory: async () => undefined,
-    removeCategory: async () => undefined,
-    initializeDefaultCategories: async () => {},
-    addDot: async () => {
-      throw new Error('Not implemented in test')
-    },
-    removeDot: async () => undefined,
-    loadData: async () => {},
-    exportCsv: async () => {},
-    ...overrides,
-  }
-}
 
 describe('store selectors', () => {
   it('selectCategoryList returns categories from Map', () => {
     const reactCategory = buildCategory({ id: 'react', title: 'React' })
     const vueCategory = buildCategory({ id: 'vue', title: 'Vue' })
-    const store = buildStore({
+    const store = createMockDotBoardStore({
       categories: new Map([
         [reactCategory.id, reactCategory],
         [vueCategory.id, vueCategory],
@@ -59,7 +31,7 @@ describe('store selectors', () => {
       ['react', buildCategory({ id: 'react', title: 'React' })],
     ])
 
-    const store = buildStore({ categories: categoriesMap })
+    const store = createMockDotBoardStore({ categories: categoriesMap })
 
     const result1 = selectCategoryList(store)
     const result2 = selectCategoryList(store)
@@ -87,7 +59,7 @@ describe('store selectors', () => {
       isDeleted: 1,
     })
 
-    const store = buildStore({
+    const store = createMockDotBoardStore({
       dots: new Map([
         ['dot-1', dot1],
         ['dot-2', dot2],
@@ -109,7 +81,7 @@ describe('store selectors', () => {
       ['dot-1', buildDot({ id: 'dot-1', categoryId: 'react', name: 'Alice' })],
     ])
 
-    const store = buildStore({ dots: dotsMap })
+    const store = createMockDotBoardStore({ dots: dotsMap })
 
     const result1 = selectDotsByCategory(store)
     const result2 = selectDotsByCategory(store)
@@ -130,7 +102,7 @@ describe('store selectors', () => {
       name: 'Bob',
     })
 
-    const store = buildStore({
+    const store = createMockDotBoardStore({
       dots: new Map([
         ['dot-1', dot1],
         ['dot-2', dot2],
@@ -145,7 +117,7 @@ describe('store selectors', () => {
   })
 
   it('selectCategoryDotCount counts dots by category', () => {
-    const store = buildStore({
+    const store = createMockDotBoardStore({
       dots: new Map([
         [
           'dot-1',

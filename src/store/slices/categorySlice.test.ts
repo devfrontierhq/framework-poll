@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { buildCategory, buildDot } from '@test/builders'
+
 import type { DotBoardStore } from '../types'
 import { createCategorySlice } from './categorySlice'
 
@@ -86,30 +88,9 @@ describe('categorySlice initializeDefaultCategories', () => {
     expect(mockInitializeDefaultCategoriesAtomic).toHaveBeenCalledTimes(1)
 
     resolveCategories?.([
-      {
-        id: 'react-id',
-        title: 'React',
-        color: '#61dafb',
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      },
-      {
-        id: 'vue-id',
-        title: 'Vue',
-        color: '#42b883',
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      },
-      {
-        id: 'angular-id',
-        title: 'Angular',
-        color: '#dd0031',
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      },
+      buildCategory({ id: 'react-id', title: 'React', color: '#61dafb' }),
+      buildCategory({ id: 'vue-id', title: 'Vue', color: '#42b883' }),
+      buildCategory({ id: 'angular-id', title: 'Angular', color: '#dd0031' }),
     ])
 
     await firstRun
@@ -141,30 +122,9 @@ describe('categorySlice initializeDefaultCategories', () => {
     await Promise.resolve()
 
     resolveCategories?.([
-      {
-        id: 'react-id',
-        title: 'React',
-        color: '#61dafb',
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      },
-      {
-        id: 'vue-id',
-        title: 'Vue',
-        color: '#42b883',
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      },
-      {
-        id: 'angular-id',
-        title: 'Angular',
-        color: '#dd0031',
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      },
+      buildCategory({ id: 'react-id', title: 'React', color: '#61dafb' }),
+      buildCategory({ id: 'vue-id', title: 'Vue', color: '#42b883' }),
+      buildCategory({ id: 'angular-id', title: 'Angular', color: '#dd0031' }),
     ])
 
     await initialization
@@ -254,30 +214,9 @@ describe('categorySlice initializeDefaultCategories', () => {
 
   it('skips creation when defaults already exist in IndexedDB and refreshes stale store', async () => {
     mockInitializeDefaultCategoriesAtomic.mockResolvedValueOnce([
-      {
-        id: 'react-id',
-        title: 'React',
-        color: '#61dafb',
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      },
-      {
-        id: 'vue-id',
-        title: 'Vue',
-        color: '#42b883',
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      },
-      {
-        id: 'angular-id',
-        title: 'Angular',
-        color: '#dd0031',
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      },
+      buildCategory({ id: 'react-id', title: 'React', color: '#61dafb' }),
+      buildCategory({ id: 'vue-id', title: 'Vue', color: '#42b883' }),
+      buildCategory({ id: 'angular-id', title: 'Angular', color: '#dd0031' }),
     ])
 
     await store.initializeDefaultCategories()
@@ -290,42 +229,18 @@ describe('categorySlice initializeDefaultCategories', () => {
 
   it('refreshes active dots when defaults already exist in IndexedDB', async () => {
     mockInitializeDefaultCategoriesAtomic.mockResolvedValueOnce([
-      {
-        id: 'react-id',
-        title: 'React',
-        color: '#61dafb',
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      },
-      {
-        id: 'vue-id',
-        title: 'Vue',
-        color: '#42b883',
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      },
-      {
-        id: 'angular-id',
-        title: 'Angular',
-        color: '#dd0031',
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      },
+      buildCategory({ id: 'react-id', title: 'React', color: '#61dafb' }),
+      buildCategory({ id: 'vue-id', title: 'Vue', color: '#42b883' }),
+      buildCategory({ id: 'angular-id', title: 'Angular', color: '#dd0031' }),
     ])
     mockGetActiveDots.mockResolvedValueOnce([
-      {
+      buildDot({
         id: 'dot-1',
         categoryId: 'react-id',
         name: 'Alice',
         xRatio: 0.4,
         yRatio: 0.5,
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      },
+      }),
     ])
 
     await store.initializeDefaultCategories()
@@ -338,22 +253,8 @@ describe('categorySlice initializeDefaultCategories', () => {
 
   it('preserves seeded categories in store when dot refresh fails', async () => {
     mockInitializeDefaultCategoriesAtomic.mockResolvedValueOnce([
-      {
-        id: 'react-id',
-        title: 'React',
-        color: '#61dafb',
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      },
-      {
-        id: 'vue-id',
-        title: 'Vue',
-        color: '#42b883',
-        createdAt: new Date().toISOString(),
-        deletedAt: null,
-        isDeleted: 0,
-      },
+      buildCategory({ id: 'react-id', title: 'React', color: '#61dafb' }),
+      buildCategory({ id: 'vue-id', title: 'Vue', color: '#42b883' }),
     ])
     mockGetActiveDots.mockRejectedValueOnce(new Error('dot refresh failed'))
 

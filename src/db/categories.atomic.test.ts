@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { buildCategory } from '@test/builders'
+
 import type { Category } from '@/types/dotBoard'
 
 const { committedCategories, getDb, resetTransactionQueue } = vi.hoisted(() => {
@@ -162,14 +164,14 @@ describe('initializeDefaultCategoriesAtomic', () => {
   })
 
   it('does not append defaults when active categories already exist', async () => {
-    committedCategories.set('svelte-id', {
-      id: 'svelte-id',
-      title: 'Svelte',
-      color: '#ff3e00',
-      createdAt: new Date().toISOString(),
-      deletedAt: null,
-      isDeleted: 0,
-    })
+    committedCategories.set(
+      'svelte-id',
+      buildCategory({
+        id: 'svelte-id',
+        title: 'Svelte',
+        color: '#ff3e00',
+      }),
+    )
 
     const result = await initializeDefaultCategoriesAtomic([
       { title: 'React', color: '#61dafb' },
