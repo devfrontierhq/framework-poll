@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -12,6 +11,8 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 
+import { useDialogSubmit } from '@/hooks/useDialogSubmit'
+
 type AddDotDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -19,58 +20,36 @@ type AddDotDialogProps = {
   onSubmit: (name: string) => Promise<void> | void
 }
 
-export function AddDotDialog({
-  open,
-  onOpenChange,
-  categoryTitle,
-  onSubmit,
-}: AddDotDialogProps) {
+export function AddDotDialog({ open, onOpenChange, categoryTitle, onSubmit }: AddDotDialogProps) {
   const [name, setName] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) {
-      setName('')
-    }
-
-    onOpenChange(nextOpen)
+  const closeDialog = () => {
+    setName('')
+    onOpenChange(false)
   }
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const {
+    isSubmitting,
+    handleSubmit: submitDialog,
+    handleCancel,
+    handleOpenChange,
+  } = useDialogSubmit({
+    onClose: closeDialog,
+    successMessage: () => `新增成功：${name.trim()}`,
+    errorMessagePrefix: '新增失敗',
+  })
+
+  const handleFormSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
     const trimmedName = name.trim()
-
-    if (!trimmedName || isSubmitting) {
-      return
-    }
-
-    try {
-      setIsSubmitting(true)
-      await onSubmit(trimmedName)
-      toast.success(`新增成功：${trimmedName}`)
-      setName('')
-      onOpenChange(false)
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : '新增名稱時發生未知錯誤'
-      toast.error(`新增失敗：${message}`)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleCancel = () => {
-    if (isSubmitting) {
-      return
-    }
-
-    onOpenChange(false)
+    if (!trimmedName) return
+    await submitDialog(() => Promise.resolve(onSubmit(trimmedName)))
   }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleFormSubmit}>
           <DialogHeader>
             <DialogTitle>新增</DialogTitle>
             <DialogDescription>{categoryTitle}</DialogDescription>
@@ -95,12 +74,7 @@ export function AddDotDialog({
             </div>
           </div>
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-              disabled={isSubmitting}
-            >
+            <Button type="button" variant="outline" onClick={handleCancel} disabled={isSubmitting}>
               取消
             </Button>
             <Button type="submit" disabled={!name.trim() || isSubmitting}>
