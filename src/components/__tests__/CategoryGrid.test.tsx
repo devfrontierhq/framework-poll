@@ -7,23 +7,13 @@ import type { Category, Dot } from '@/types/dotBoard'
 import { CategoryGrid } from '../CategoryGrid'
 
 vi.mock('../CategoryCard', () => ({
-  CategoryCard: vi.fn(
-    ({
-      category,
-      categoryDots,
-    }: {
-      category: Category
-      categoryDots: Dot[]
-    }) => (
-      <div data-testid="category-card">
-        <span>{category.title}</span>
-        <span data-testid={`dot-count-${category.id}`}>
-          {categoryDots.length}
-        </span>
-        <span>{categoryDots.map((dot) => dot.name).join(',')}</span>
-      </div>
-    ),
-  ),
+  CategoryCard: vi.fn(({ category, categoryDots }: { category: Category; categoryDots: Dot[] }) => (
+    <div data-testid="category-card">
+      <span>{category.title}</span>
+      <span data-testid={`dot-count-${category.id}`}>{categoryDots.length}</span>
+      <span>{categoryDots.map((dot) => dot.name).join(',')}</span>
+    </div>
+  )),
 }))
 
 afterEach(() => {
@@ -61,19 +51,10 @@ describe('CategoryGrid', () => {
       ],
     ])
 
-    render(
-      <CategoryGrid
-        categories={[reactCategory, vueCategory]}
-        dotsByCategory={dotsByCategory}
-      />,
-    )
+    render(<CategoryGrid categories={[reactCategory, vueCategory]} dotsByCategory={dotsByCategory} />)
 
-    expect(
-      screen.getByTestId(`dot-count-${reactCategory.id}`),
-    ).toHaveTextContent('1')
-    expect(screen.getByTestId(`dot-count-${vueCategory.id}`)).toHaveTextContent(
-      '1',
-    )
+    expect(screen.getByTestId(`dot-count-${reactCategory.id}`)).toHaveTextContent('1')
+    expect(screen.getByTestId(`dot-count-${vueCategory.id}`)).toHaveTextContent('1')
     expect(screen.getByText('Alice')).toBeInTheDocument()
     expect(screen.getByText('Bob')).toBeInTheDocument()
   })
@@ -85,20 +66,13 @@ describe('CategoryGrid', () => {
       buildCategory({ id: 'category-angular', title: 'Angular' }),
     ]
 
-    const { getByTestId } = render(
-      <CategoryGrid categories={categories} dotsByCategory={new Map()} />,
-    )
+    const { getByTestId } = render(<CategoryGrid categories={categories} dotsByCategory={new Map()} />)
 
-    expect(getByTestId('category-grid-viewport')).not.toHaveClass(
-      'overflow-x-auto',
-    )
-    expect(getByTestId('category-grid-track')).toHaveClass(
-      'md:grid',
-      'md:grid-cols-3',
-    )
+    expect(getByTestId('category-grid-viewport')).not.toHaveClass('overflow-x-auto')
+    expect(getByTestId('category-grid-track')).toHaveClass('md:grid', 'md:grid-cols-3')
   })
 
-  it('enables horizontal scrolling with fixed-width columns when there are more than three categories', () => {
+  it('enables vertical scrolling with square aspect ratio when there are more than three categories', () => {
     const categories = [
       buildCategory({ id: 'category-react', title: 'React' }),
       buildCategory({ id: 'category-vue', title: 'Vue' }),
@@ -106,14 +80,9 @@ describe('CategoryGrid', () => {
       buildCategory({ id: 'category-svelte', title: 'Svelte' }),
     ]
 
-    const { getByTestId } = render(
-      <CategoryGrid categories={categories} dotsByCategory={new Map()} />,
-    )
+    const { getByTestId } = render(<CategoryGrid categories={categories} dotsByCategory={new Map()} />)
 
-    expect(getByTestId('category-grid-viewport')).toHaveClass('overflow-x-auto')
-    expect(getByTestId('category-grid-track')).toHaveClass(
-      'md:inline-flex',
-      'md:flex-row',
-    )
+    expect(getByTestId('category-grid-viewport')).toHaveClass('md:overflow-y-auto')
+    expect(getByTestId('category-grid-track')).toHaveClass('md:grid', 'md:grid-cols-3')
   })
 })
