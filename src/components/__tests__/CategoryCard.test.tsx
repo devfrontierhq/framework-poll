@@ -7,7 +7,7 @@ import { buildCategory, buildDot } from '@test/builders'
 import { getBoundedPosition } from '@/lib/dotPosition'
 import { createMockDotBoardStore } from '@test/store'
 
-import { CategoryCard } from './CategoryCard'
+import { CategoryCard } from '../CategoryCard'
 
 import { useDotBoardStore } from '@/store/dotBoardStore'
 

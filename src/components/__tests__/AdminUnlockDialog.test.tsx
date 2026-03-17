@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { toast } from 'sonner'
 
-import { AdminUnlockDialog } from './AdminUnlockDialog'
+import { AdminUnlockDialog } from '../AdminUnlockDialog'
 import { useDotBoardStore } from '@/store/dotBoardStore'
 
 vi.mock('sonner')

@@ -4,9 +4,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { buildCategory, buildDot } from '@test/builders'
 import type { Category, Dot } from '@/types/dotBoard'
 
-import { CategoryGrid } from './CategoryGrid'
+import { CategoryGrid } from '../CategoryGrid'
 
-vi.mock('./CategoryCard', () => ({
+vi.mock('../CategoryCard', () => ({
   CategoryCard: vi.fn(
     ({
       category,

@@ -4,7 +4,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { createMockDotBoardStore } from '@test/store'
 import { buildCategory, buildDot } from '@test/builders'
 
-import { CategoryGrid } from './CategoryGrid'
+import { CategoryGrid } from '../CategoryGrid'
 import { useDotBoardStore } from '@/store/dotBoardStore'
 
 // Mock the store

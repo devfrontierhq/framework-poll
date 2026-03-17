@@ -4,11 +4,11 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 
 import { createMockDotBoardStore } from '@test/store'
 
-import App from './App'
-import { useDotBoardStore } from './store/dotBoardStore'
+import App from '../App'
+import { useDotBoardStore } from '../store/dotBoardStore'
 
 // Mock the store
-vi.mock('./store/dotBoardStore', () => ({
+vi.mock('../store/dotBoardStore', () => ({
   useDotBoardStore: vi.fn(),
 }))
 

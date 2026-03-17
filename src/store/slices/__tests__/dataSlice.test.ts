@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { buildCategory, buildDot } from '@test/builders'
 
-import type { DotBoardStore } from '../types'
-import { createDataSlice } from './dataSlice'
+import type { DotBoardStore } from '../../types'
+import { createDataSlice } from '../dataSlice'
 
 // Mock the database module
 vi.mock('@/db', () => ({

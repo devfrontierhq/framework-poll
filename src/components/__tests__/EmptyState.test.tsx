@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 
 import { createMockDotBoardStore } from '@test/store'
 
-import { EmptyState } from './EmptyState'
+import { EmptyState } from '../EmptyState'
 import { useDotBoardStore } from '@/store/dotBoardStore'
 
 vi.mock('@/store/dotBoardStore')

@@ -2,13 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { buildDot } from '@test/builders'
 
-import type { DotBoardStore } from '../types'
+import type { DotBoardStore } from '../../types'
 import {
   ADMIN_REQUIRED_ERROR,
   DELETE_PASSWORD_REQUIRED_ERROR,
   INVALID_DELETE_PASSWORD_ERROR,
-} from '../types'
-import { createDotSlice } from './dotSlice'
+} from '../../types'
+import { createDotSlice } from '../dotSlice'
 
 // Mock the database module
 vi.mock('@/db', () => ({

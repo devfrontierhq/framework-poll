@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { buildCategory, buildDot } from '@test/builders'
 
-import { isActive, isDeleted } from './dotBoard'
+import { isActive, isDeleted } from '../dotBoard'
 
 describe('Soft Delete Implementation', () => {
   describe('isActive', () => {

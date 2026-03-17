@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { toast } from 'sonner'
 
-import { DeleteDotDialog } from './DeleteDotDialog'
+import { DeleteDotDialog } from '../DeleteDotDialog'
 import { useDotBoardStore } from '@/store/dotBoardStore'
 import { buildDot } from '@test/builders'
 import { INVALID_DELETE_PASSWORD_ERROR } from '@/store/types'

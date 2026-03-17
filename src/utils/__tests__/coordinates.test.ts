@@ -5,7 +5,7 @@ import { isValidCoordinates } from '@/types/dotBoard'
 import {
   calculateRelativeCoordinates,
   calculatePixelPosition,
-} from './coordinates'
+} from '../coordinates'
 
 describe('Relative Coordinate System', () => {
   describe('calculateRelativeCoordinates', () => {

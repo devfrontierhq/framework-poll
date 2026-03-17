@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { toast } from 'sonner'
 
-import { CategoryDialog } from './CategoryDialog'
+import { CategoryDialog } from '../CategoryDialog'
 import { useDotBoardStore } from '@/store/dotBoardStore'
 import { buildCategory } from '@test/builders'
 

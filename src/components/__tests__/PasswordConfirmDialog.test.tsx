@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { toast } from 'sonner'
 
-import { PasswordConfirmDialog } from './PasswordConfirmDialog'
+import { PasswordConfirmDialog } from '../PasswordConfirmDialog'
 
 vi.mock('sonner')
 

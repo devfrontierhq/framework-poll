@@ -4,7 +4,7 @@ import { buildCategory, buildDot } from '@test/builders'
 import { isActive } from '@/types/dotBoard'
 import type { Dot } from '@/types/dotBoard'
 
-import { groupDotsByCategory } from './count'
+import { groupDotsByCategory } from '../count'
 
 describe('groupDotsByCategory', () => {
   it('groups only non-deleted dots for a category', () => {

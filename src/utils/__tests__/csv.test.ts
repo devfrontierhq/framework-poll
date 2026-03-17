@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { buildCategory, buildDot } from '@test/builders'
 
-import { buildCsvRows, formatCsvDateTime } from './csv'
+import { buildCsvRows, formatCsvDateTime } from '../csv'
 
 describe('formatCsvDateTime', () => {
   it('should format valid ISO date string to yyyy-MM-dd HH:mm format', () => {

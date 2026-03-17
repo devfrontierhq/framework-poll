@@ -8,7 +8,7 @@ import {
   selectCategoryDots,
   selectCategoryList,
   selectDotsByCategory,
-} from './selectors'
+} from '../selectors'
 
 describe('store selectors', () => {
   it('selectCategoryList returns categories from Map', () => {

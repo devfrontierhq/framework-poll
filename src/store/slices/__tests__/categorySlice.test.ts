@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { buildCategory, buildDot } from '@test/builders'
 
-import type { DotBoardStore } from '../types'
-import { createCategorySlice } from './categorySlice'
+import type { DotBoardStore } from '../../types'
+import { createCategorySlice } from '../categorySlice'
 
 vi.mock('@/db', () => ({
   createCategory: vi.fn(),

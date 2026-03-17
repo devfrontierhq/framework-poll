@@ -6,12 +6,12 @@ import { toast } from 'sonner'
 import { createMockDotBoardStore } from '@test/store'
 import { buildCategory, buildDot } from '@test/builders'
 
-import { AdminUnlockDialog } from './AdminUnlockDialog'
-import { PasswordConfirmDialog } from './PasswordConfirmDialog'
-import { DeleteCategoryDialog } from './DeleteCategoryDialog'
-import { DeleteDotDialog } from './DeleteDotDialog'
-import { EmptyState } from './EmptyState'
-import { ExportCsvButton } from './ExportCsvButton'
+import { AdminUnlockDialog } from '../AdminUnlockDialog'
+import { PasswordConfirmDialog } from '../PasswordConfirmDialog'
+import { DeleteCategoryDialog } from '../DeleteCategoryDialog'
+import { DeleteDotDialog } from '../DeleteDotDialog'
+import { EmptyState } from '../EmptyState'
+import { ExportCsvButton } from '../ExportCsvButton'
 import { useDotBoardStore } from '@/store/dotBoardStore'
 
 // Mock the store

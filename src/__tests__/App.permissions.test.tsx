@@ -5,12 +5,12 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { createMockDotBoardStore } from '@test/store'
 import { buildCategory, buildDot } from '@test/builders'
 
-import App from './App'
-import { useDotBoardStore } from './store/dotBoardStore'
-import { CategoryCard } from './components/CategoryCard'
+import App from '../App'
+import { useDotBoardStore } from '../store/dotBoardStore'
+import { CategoryCard } from '../components/CategoryCard'
 
 // Mock the store
-vi.mock('./store/dotBoardStore', () => ({
+vi.mock('../store/dotBoardStore', () => ({
   useDotBoardStore: vi.fn(),
 }))
 

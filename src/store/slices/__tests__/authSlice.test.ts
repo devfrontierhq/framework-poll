@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { DotBoardStore } from '../types'
-import { createAuthSlice } from './authSlice'
+import type { DotBoardStore } from '../../types'
+import { createAuthSlice } from '../authSlice'
 
 // Mock the env utility
 vi.mock('@/utils/env', () => ({
