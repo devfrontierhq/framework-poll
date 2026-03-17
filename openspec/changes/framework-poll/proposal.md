@@ -26,6 +26,7 @@
 ### Modified Capabilities
 
 - `admin-mode`: 限制初始化預設框架板塊的按鈕，只在開發模式（`import.meta.env.DEV`）下顯示
+- `category-management`: 調整平板與桌機版面——固定 3 欄格子，≤3 筆時格子長方形撐滿高度，≥4 筆時格子改為正方形（依容器寬自動計算）並開啟垂直捲軸
 
 ## Impact
 

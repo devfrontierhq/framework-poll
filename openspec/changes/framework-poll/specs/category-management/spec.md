@@ -92,17 +92,20 @@ The system SHALL maintain a sortOrder for all categories to ensure consistent di
 
 The system SHALL display all non-deleted categories in a responsive grid layout ordered by sortOrder.
 
-#### Scenario: Desktop and tablet layout without overflow
+#### Scenario: Desktop and tablet layout with 3 or fewer categories
 - **WHEN** the viewport width is greater than or equal to 768px
 - **AND** there are 3 or fewer categories
-- **THEN** the system displays categories in a 3-column layout
-- **AND** the container SHALL NOT require horizontal scrolling
+- **THEN** the system displays categories in a 3-column grid
+- **AND** each category card SHALL fill the available height (portrait/rectangular aspect ratio)
+- **AND** the container SHALL NOT scroll horizontally or vertically
 
-#### Scenario: Desktop and tablet layout with horizontal scroll
+#### Scenario: Desktop and tablet layout with 4 or more categories
 - **WHEN** the viewport width is greater than or equal to 768px
 - **AND** there are more than 3 categories
-- **THEN** the system displays categories in fixed-width columns (320px per column)
-- **AND** the container enables horizontal scrolling
+- **THEN** the system displays categories in a 3-column grid
+- **AND** each category card SHALL have a square aspect ratio (1:1), with the side length equal to the computed column width
+- **AND** the column width SHALL be calculated from the available container width divided equally by 3 (accounting for gaps)
+- **AND** the container SHALL enable vertical scrolling to accommodate additional rows
 
 #### Scenario: Mobile layout
 - **WHEN** the viewport width is less than 768px
