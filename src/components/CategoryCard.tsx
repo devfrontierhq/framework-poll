@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Pencil, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,12 @@ import { DeleteDotDialog } from '@/components/DeleteDotDialog'
 import { useDotBoardStore } from '@/store/dotBoardStore'
 import { getBoundedPosition } from '@/lib/dotPosition'
 import { calculateRelativeCoordinates } from '@/utils/coordinates'
+import { useLongPress } from '@/hooks/useLongPress'
+
+const DOT_OPACITY = 0.8
+const DOT_BORDER = '2px solid rgba(255, 255, 255, 0.95)'
+const DOT_OVERLAP_RING = '0 0 0 1px rgba(15, 23, 42, 0.16)'
+const TOOLTIP_DISMISS_DELAY_MS = 1500
 
 type CategoryCardProps = {
   category: Category
@@ -21,9 +27,103 @@ type CategoryCardProps = {
 
 type OpenDialog = 'none' | 'add-dot' | 'edit' | 'delete-category' | 'delete-dot'
 
-const DOT_OPACITY = 0.8
-const DOT_BORDER = '2px solid rgba(255, 255, 255, 0.95)'
-const DOT_OVERLAP_RING = '0 0 0 1px rgba(15, 23, 42, 0.16)'
+type DotWrapperProps = {
+  dot: Dot
+  category: Category
+  isAdminUnlocked: boolean
+  onDotClick: (e: React.MouseEvent<HTMLButtonElement>, dot: Dot) => void
+}
+
+function DotWrapper({ dot, category, isAdminUnlocked, onDotClick }: DotWrapperProps) {
+  const [showTooltip, setShowTooltip] = useState(false)
+  const tooltipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const clearTooltipTimer = () => {
+    if (tooltipTimerRef.current) {
+      clearTimeout(tooltipTimerRef.current)
+      tooltipTimerRef.current = null
+    }
+  }
+
+  const { handlers, didLongPress, clearLongPress } = useLongPress({
+    onLongPress: () => {
+      clearTooltipTimer()
+      setShowTooltip(true)
+    },
+    onCancel: () => {
+      clearTooltipTimer()
+      setShowTooltip(false)
+    },
+    onRelease: () => {
+      clearTooltipTimer()
+      tooltipTimerRef.current = setTimeout(() => setShowTooltip(false), TOOLTIP_DISMISS_DELAY_MS)
+    },
+    onAbort: () => {
+      clearTooltipTimer()
+      setShowTooltip(false)
+    },
+  })
+
+  const tooltipClass = showTooltip ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+
+  return (
+    <div
+      data-testid="category-dot-wrapper"
+      className={`group absolute -translate-x-1/2 -translate-y-1/2 hover:z-20 ${showTooltip ? 'z-20' : ''}`}
+      style={{
+        left: getBoundedPosition(dot.xRatio),
+        top: getBoundedPosition(dot.yRatio),
+      }}
+      {...handlers}
+      onClick={(e) => {
+        if (didLongPress.current) {
+          e.stopPropagation()
+          clearLongPress()
+        }
+      }}
+    >
+      {isAdminUnlocked ? (
+        <button
+          type="button"
+          data-testid="category-dot"
+          className="h-3 w-3 cursor-pointer rounded-full transition-transform hover:scale-125"
+          style={{
+            backgroundColor: category.color,
+            border: DOT_BORDER,
+            boxShadow: DOT_OVERLAP_RING,
+            opacity: DOT_OPACITY,
+          }}
+          aria-label={`刪除圓點 ${dot.name}`}
+          onClick={(e) => {
+            if (!didLongPress.current) {
+              onDotClick(e, dot)
+            }
+          }}
+        />
+      ) : (
+        <div
+          data-testid="category-dot"
+          className="h-3 w-3 rounded-full"
+          style={{
+            backgroundColor: category.color,
+            border: DOT_BORDER,
+            boxShadow: DOT_OVERLAP_RING,
+            opacity: DOT_OPACITY,
+          }}
+          aria-label={dot.name}
+        />
+      )}
+      <div
+        data-testid="dot-hover-label"
+        className={`pointer-events-none absolute top-0 left-1/2 z-10 -translate-x-1/2 -translate-y-full rounded-md
+          bg-slate-950 px-2 py-1 text-xs font-medium whitespace-nowrap text-white shadow-lg transition-opacity
+          ${tooltipClass}`}
+      >
+        {dot.name}
+      </div>
+    </div>
+  )
+}
 
 export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
   const isAdminUnlocked = useDotBoardStore((state) => state.isAdminUnlocked)
@@ -121,51 +221,13 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
       {/* Dot display area */}
       <div className="relative flex-1 cursor-pointer p-4" onClick={handleAreaClick}>
         {categoryDots.map((dot) => (
-          <div
+          <DotWrapper
             key={dot.id}
-            data-testid="category-dot-wrapper"
-            className="group absolute -translate-x-1/2 -translate-y-1/2"
-            style={{
-              left: getBoundedPosition(dot.xRatio),
-              top: getBoundedPosition(dot.yRatio),
-            }}
-          >
-            {isAdminUnlocked ? (
-              <button
-                type="button"
-                data-testid="category-dot"
-                className="h-3 w-3 cursor-pointer rounded-full transition-transform hover:scale-125"
-                style={{
-                  backgroundColor: category.color,
-                  border: DOT_BORDER,
-                  boxShadow: DOT_OVERLAP_RING,
-                  opacity: DOT_OPACITY,
-                }}
-                aria-label={`刪除圓點 ${dot.name}`}
-                onClick={(e) => handleDotClick(e, dot)}
-              />
-            ) : (
-              <div
-                data-testid="category-dot"
-                className="h-3 w-3 rounded-full"
-                style={{
-                  backgroundColor: category.color,
-                  border: DOT_BORDER,
-                  boxShadow: DOT_OVERLAP_RING,
-                  opacity: DOT_OPACITY,
-                }}
-                aria-label={dot.name}
-              />
-            )}
-            <div
-              data-testid="dot-hover-label"
-              className="pointer-events-none absolute top-0 left-1/2 z-10 -translate-x-1/2 -translate-y-full rounded-md
-                bg-slate-950 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity
-                group-hover:opacity-100"
-            >
-              {dot.name}
-            </div>
-          </div>
+            dot={dot}
+            category={category}
+            isAdminUnlocked={isAdminUnlocked}
+            onDotClick={handleDotClick}
+          />
         ))}
       </div>
 
