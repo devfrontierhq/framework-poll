@@ -64,6 +64,9 @@
 - [x] 6.5 在 CategoryCard 實作顯示未刪除 dots 的功能實作 no duplicate name validation
 - [x] 6.6 實作 handle dot overlap：dots 的半透明（opacity: 0.8）與邊框樣式處理圓點重疊時辨識度降低
 - [x] 6.7 實作 display dot information：hover dot 時顯示名稱的功能
+- [ ] 6.8 建立 useLongPress hook（src/hooks/useLongPress.ts）：觸控裝置長按（500ms）事件處理，支援提前放開取消與手指移動超過 moveThreshold 取消
+- [ ] 6.9 在 CategoryCard 整合 useLongPress：觸控裝置（平板）長按 dot 時顯示 tooltip，桌機維持 hover 行為
+- [ ] 6.10 測試 useLongPress hook：驗證 500ms 觸發、提前放開取消、手指移動超過 moveThreshold 取消
 
 ## 7. 初始化功能（解決測試冷啟動問題）
 
