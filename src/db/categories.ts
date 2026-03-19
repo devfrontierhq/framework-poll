@@ -4,29 +4,36 @@ import { createId } from '@/utils/id'
 
 import { getDb } from '@/db/client'
 import { DotBoardDataError } from '@/db/errors'
-import {
-  INDEX_NAMES,
-  STORE_NAMES,
-  type CreateCategoryInput,
-  type UpdateCategoryInput,
-} from '@/db/schema'
+import { INDEX_NAMES, STORE_NAMES, type CreateCategoryInput, type UpdateCategoryInput } from '@/db/schema'
 import { getTimestamp, omitUndefinedFields, withDbError } from '@/db/utils'
 
 function normalizeCategoryTitle(title: string) {
   return title.trim().toLowerCase()
 }
 
-export async function createCategory(
-  input: CreateCategoryInput,
-): Promise<Category> {
-  const category = buildCategory(input)
+function getNextSortOrder(categories: Pick<Category, 'sortOrder'>[]): number {
+  if (categories.length === 0) {
+    return 1
+  }
 
-  const database = await getDb()
-  await withDbError('create category', () =>
-    database.add(STORE_NAMES.categories, category),
-  )
+  const maxSortOrder = Math.max(...categories.map((cat) => cat.sortOrder))
+  return maxSortOrder + 1
+}
 
-  return category
+export async function createCategory(input: CreateCategoryInput): Promise<Category> {
+  return withDbError('create category', async () => {
+    const database = await getDb()
+    const transaction = database.transaction(STORE_NAMES.categories, 'readwrite')
+    const categoriesStore = transaction.objectStore(STORE_NAMES.categories)
+    const activeCategories = await categoriesStore.index(INDEX_NAMES.categories.isDeleted).getAll(0)
+    const sortOrder = input.sortOrder ?? getNextSortOrder(activeCategories)
+    const category = buildCategory({ ...input, sortOrder })
+
+    await categoriesStore.add(category)
+    await transaction.done
+
+    return category
+  })
 }
 
 /**
@@ -35,16 +42,13 @@ export async function createCategory(
  * do not end up with partially persisted categories.
  */
 export async function createCategoriesAtomic(
-  inputs: CreateCategoryInput[],
+  inputs: (CreateCategoryInput & { sortOrder: number })[],
 ): Promise<Category[]> {
   return withDbError('create categories', async () => {
     const categories = inputs.map(buildCategory)
 
     const database = await getDb()
-    const transaction = database.transaction(
-      STORE_NAMES.categories,
-      'readwrite',
-    )
+    const transaction = database.transaction(STORE_NAMES.categories, 'readwrite')
     const categoriesStore = transaction.objectStore(STORE_NAMES.categories)
 
     for (const category of categories) {
@@ -62,23 +66,14 @@ export async function createCategoriesAtomic(
  * tabs cannot append defaults onto a board that is no longer empty.
  */
 export async function initializeDefaultCategoriesAtomic(
-  inputs: CreateCategoryInput[],
+  inputs: (CreateCategoryInput & { sortOrder: number })[],
 ): Promise<Category[]> {
   return withDbError('initialize default categories', async () => {
     const database = await getDb()
-    const transaction = database.transaction(
-      STORE_NAMES.categories,
-      'readwrite',
-    )
+    const transaction = database.transaction(STORE_NAMES.categories, 'readwrite')
     const categoriesStore = transaction.objectStore(STORE_NAMES.categories)
-    const activeCategories = await categoriesStore
-      .index(INDEX_NAMES.categories.isDeleted)
-      .getAll(0)
-    const activeTitles = new Set(
-      activeCategories.map((category) =>
-        normalizeCategoryTitle(category.title),
-      ),
-    )
+    const activeCategories = await categoriesStore.index(INDEX_NAMES.categories.isDeleted).getAll(0)
+    const activeTitles = new Set(activeCategories.map((category) => normalizeCategoryTitle(category.title)))
 
     if (activeCategories.length > 0) {
       await transaction.done
@@ -105,56 +100,41 @@ export async function initializeDefaultCategoriesAtomic(
 
 export async function getCategory(categoryId: Category['id']) {
   const database = await getDb()
-  return withDbError('read category', () =>
-    database.get(STORE_NAMES.categories, categoryId),
-  )
+  return withDbError('read category', () => database.get(STORE_NAMES.categories, categoryId))
 }
 
 export async function getActiveCategories() {
   const database = await getDb()
   return withDbError('read active categories', () =>
-    database.getAllFromIndex(
-      STORE_NAMES.categories,
-      INDEX_NAMES.categories.isDeleted,
-      0,
-    ),
+    database.getAllFromIndex(STORE_NAMES.categories, INDEX_NAMES.categories.isDeleted, 0),
   )
 }
 
 export async function getAllCategories() {
   const database = await getDb()
-  return withDbError('read all categories', () =>
-    database.getAll(STORE_NAMES.categories),
-  )
+  return withDbError('read all categories', () => database.getAll(STORE_NAMES.categories))
 }
 
-function buildCategory(input: CreateCategoryInput): Category {
+function buildCategory(input: CreateCategoryInput & { sortOrder: number }): Category {
   if (!isValidHexColor(input.color)) {
-    throw new DotBoardDataError(
-      `Invalid color format: ${input.color}. Must be hex format (#RRGGBB).`,
-    )
+    throw new DotBoardDataError(`Invalid color format: ${input.color}. Must be hex format (#RRGGBB).`)
   }
 
   return {
     id: createId(),
     title: input.title,
     color: input.color,
+    sortOrder: input.sortOrder,
     createdAt: getTimestamp(),
     deletedAt: null,
     isDeleted: 0,
   }
 }
 
-export async function updateCategory(
-  categoryId: Category['id'],
-  updates: UpdateCategoryInput,
-) {
+export async function updateCategory(categoryId: Category['id'], updates: UpdateCategoryInput) {
   return withDbError('update category', async () => {
     const database = await getDb()
-    const transaction = database.transaction(
-      STORE_NAMES.categories,
-      'readwrite',
-    )
+    const transaction = database.transaction(STORE_NAMES.categories, 'readwrite')
     const categoriesStore = transaction.objectStore(STORE_NAMES.categories)
     const sanitizedUpdates = omitUndefinedFields<Category>(updates)
     const category = await categoriesStore.get(categoryId)
@@ -168,13 +148,8 @@ export async function updateCategory(
       await transaction.done
       return category
     }
-    if (
-      sanitizedUpdates.color !== undefined &&
-      !isValidHexColor(sanitizedUpdates.color)
-    ) {
-      throw new DotBoardDataError(
-        `Invalid color format: ${sanitizedUpdates.color}. Must be hex format (#RRGGBB).`,
-      )
+    if (sanitizedUpdates.color !== undefined && !isValidHexColor(sanitizedUpdates.color)) {
+      throw new DotBoardDataError(`Invalid color format: ${sanitizedUpdates.color}. Must be hex format (#RRGGBB).`)
     }
 
     const nextCategory: Category = {
@@ -192,10 +167,7 @@ export async function updateCategory(
 export async function softDeleteCategory(categoryId: Category['id']) {
   return withDbError('delete category', async () => {
     const database = await getDb()
-    const transaction = database.transaction(
-      [STORE_NAMES.categories, STORE_NAMES.dots],
-      'readwrite',
-    )
+    const transaction = database.transaction([STORE_NAMES.categories, STORE_NAMES.dots], 'readwrite')
     const categoriesStore = transaction.objectStore(STORE_NAMES.categories)
     const dotsStore = transaction.objectStore(STORE_NAMES.dots)
     const category = await categoriesStore.get(categoryId)
@@ -219,9 +191,7 @@ export async function softDeleteCategory(categoryId: Category['id']) {
 
     await categoriesStore.put(nextCategory)
 
-    const dotsByCategory = await dotsStore
-      .index(INDEX_NAMES.dots.categoryId)
-      .getAll(categoryId)
+    const dotsByCategory = await dotsStore.index(INDEX_NAMES.dots.categoryId).getAll(categoryId)
 
     await Promise.all(
       dotsByCategory

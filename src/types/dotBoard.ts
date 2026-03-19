@@ -2,6 +2,7 @@ export type Category = {
   id: string
   title: string
   color: string
+  sortOrder: number
   createdAt: string
   deletedAt: string | null
   isDeleted: 0 | 1

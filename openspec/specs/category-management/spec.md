@@ -1,0 +1,160 @@
+## ADDED Requirements
+
+### Requirement: Create category
+
+The system SHALL allow administrators to create new categories with a title and color.
+
+#### Scenario: Successful category creation
+- **WHEN** an administrator in admin mode clicks the add category button and provides a title and color
+- **THEN** the system creates a new category with the specified title and color
+- **THEN** the category appears in the category grid
+
+#### Scenario: Category created without admin mode
+- **WHEN** a non-admin user attempts to access the create category function
+- **THEN** the system SHALL NOT display the create category button
+
+### Requirement: Batch create categories
+
+The system SHALL allow administrators to create multiple categories in a single dialog interaction by adding multiple title-color rows before submitting.
+
+#### Scenario: Add a row in batch create dialog
+- **WHEN** an administrator clicks the add row button in the create category dialog
+- **THEN** the system appends a new empty row with a title input and a color picker
+
+#### Scenario: Remove a row in batch create dialog
+- **WHEN** an administrator clicks the remove button on a row
+- **AND** there are two or more rows present
+- **THEN** the system removes that row from the dialog
+
+#### Scenario: Minimum one row enforced
+- **WHEN** only one row remains in the create category dialog
+- **THEN** the system SHALL NOT display a remove button for that row
+
+#### Scenario: Successful batch creation
+- **WHEN** an administrator fills in titles and colors for all rows and submits
+- **THEN** the system creates one category for each row with the specified title and color
+- **THEN** all newly created categories appear in the category grid
+
+#### Scenario: Partial empty rows on submit
+- **WHEN** an administrator submits the dialog with one or more rows that have an empty title
+- **THEN** the system SHALL NOT create categories for rows with empty titles
+- **THEN** the system SHALL create categories for all rows with non-empty titles
+
+### Requirement: Empty state default category initialization
+
+The system SHALL allow a one-time bootstrap action to create the default framework categories when no active categories exist.
+
+#### Scenario: Initialize default categories from empty state
+- **WHEN** the application has zero active categories
+- **THEN** the system SHALL display an empty state action for creating the default framework categories
+- **WHEN** any user activates that action
+- **THEN** the system SHALL create exactly three categories: React, Vue, and Angular
+- **THEN** the categories SHALL use the predefined colors "#61dafb", "#42b883", and "#dd0031"
+- **THEN** the categories SHALL be assigned sortOrder values 1, 2, and 3 respectively
+
+#### Scenario: Default initialization is not general category management
+- **WHEN** default categories have been initialized or any active category already exists
+- **THEN** the system SHALL NOT expose the empty state initialization action
+- **THEN** non-admin users SHALL still NOT gain access to the general create category function
+
+### Requirement: Edit category
+
+The system SHALL allow administrators to edit category title and color without re-entering admin password.
+
+#### Scenario: Edit category title
+- **WHEN** an administrator in admin mode edits a category title
+- **THEN** the system updates the category title
+- **THEN** the updated title displays in the category card
+
+#### Scenario: Edit category color
+- **WHEN** an administrator in admin mode changes a category color using the color picker
+- **THEN** the system updates the category color
+- **THEN** all dots in that category display with the new color
+
+#### Scenario: Edit requires admin mode
+- **WHEN** a non-admin user attempts to edit a category
+- **THEN** the system SHALL NOT display the edit controls
+
+### Requirement: Delete category
+
+The system SHALL allow administrators to soft-delete categories after confirming with admin password.
+
+#### Scenario: Delete category with password confirmation
+- **WHEN** an administrator clicks delete on a category
+- **THEN** the system displays a confirmation dialog requesting admin password
+- **WHEN** the administrator enters the correct password
+- **THEN** the system soft-deletes the category by setting deletedAt timestamp
+- **THEN** the system soft-deletes all dots belonging to that category
+
+#### Scenario: Delete with incorrect password
+- **WHEN** an administrator enters an incorrect password in the delete confirmation
+- **THEN** the system rejects the deletion
+- **THEN** the category remains visible
+
+#### Scenario: Cascade delete dots
+- **WHEN** a category is deleted
+- **THEN** all dots with matching categoryId MUST be soft-deleted with the same timestamp
+
+### Requirement: Category ordering
+
+The system SHALL maintain a sortOrder for all categories to ensure consistent display order.
+
+#### Scenario: Assign sortOrder to new categories
+- **WHEN** a new category is created
+- **THEN** the system SHALL assign a sortOrder value one greater than the current maximum sortOrder
+
+#### Scenario: Default categories have fixed order
+- **WHEN** default categories are initialized
+- **THEN** React SHALL have sortOrder 1
+- **THEN** Vue SHALL have sortOrder 2
+- **THEN** Angular SHALL have sortOrder 3
+
+#### Scenario: Categories are displayed in sortOrder
+- **WHEN** categories are retrieved for display
+- **THEN** the system SHALL order them by sortOrder in ascending order
+- **THEN** default categories (React, Vue, Angular) MUST appear first
+- **THEN** user-created categories MUST appear after default categories in creation order
+
+### Requirement: Display categories
+
+The system SHALL display all non-deleted categories in a responsive grid layout ordered by sortOrder.
+
+#### Scenario: Desktop and tablet layout with 3 or fewer categories
+- **WHEN** the viewport width is greater than or equal to 768px
+- **AND** there are 3 or fewer categories
+- **THEN** the system displays categories in a 3-column grid
+- **AND** each category card SHALL fill the available height (portrait/rectangular aspect ratio)
+- **AND** the container SHALL NOT scroll horizontally or vertically
+
+#### Scenario: Desktop and tablet layout with 4 or more categories
+- **WHEN** the viewport width is greater than or equal to 768px
+- **AND** there are more than 3 categories
+- **THEN** the system displays categories in a 3-column grid
+- **AND** each category card SHALL have a square aspect ratio (1:1), with the side length equal to the computed column width
+- **AND** the column width SHALL be calculated from the available container width divided equally by 3 (accounting for gaps)
+- **AND** the container SHALL enable vertical scrolling to accommodate additional rows
+
+#### Scenario: Mobile layout
+- **WHEN** the viewport width is less than 768px
+- **THEN** the system displays categories in a 1-column layout
+
+#### Scenario: Show dot count in admin mode
+- **WHEN** a category is displayed in admin mode
+- **THEN** the system shows the category title and the count of non-deleted dots
+- **THEN** the count format MUST be "Title - Count" (e.g., "React - 12")
+
+#### Scenario: Hide dot count for non-admin
+- **WHEN** a category is displayed without admin mode
+- **THEN** the system shows only the category title without the count
+
+### Requirement: Store category color
+
+The system SHALL store category colors as hex color codes.
+
+#### Scenario: Color format validation
+- **WHEN** a category color is saved
+- **THEN** the system MUST store it in hex format (e.g., "#f59e0b")
+
+#### Scenario: Apply color to dots
+- **WHEN** dots are rendered for a category
+- **THEN** all dots MUST use the category's color value

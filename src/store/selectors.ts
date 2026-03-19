@@ -12,7 +12,8 @@ export const selectDots = (state: DotBoardStore) => state.dots
 // Memoized derived selectors
 export const selectCategoryList = createSelector(
   [selectCategories],
-  (categories) => Array.from(categories.values()),
+  (categories) =>
+    Array.from(categories.values()).sort((a, b) => a.sortOrder - b.sortOrder),
 )
 
 export const selectDotsByCategory = createSelector([selectDots], (dots) =>

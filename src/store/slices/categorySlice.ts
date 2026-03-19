@@ -25,9 +25,9 @@ type CategoryUpdates = {
 }
 
 const DEFAULT_CATEGORIES = [
-  { title: 'React', color: '#61dafb' },
-  { title: 'Vue', color: '#42b883' },
-  { title: 'Angular', color: '#dd0031' },
+  { title: 'React', color: '#61dafb', sortOrder: 1 },
+  { title: 'Vue', color: '#42b883', sortOrder: 2 },
+  { title: 'Angular', color: '#dd0031', sortOrder: 3 },
 ] as const
 
 function prepareNewCategoryInput(title: string, color: string) {
@@ -179,9 +179,10 @@ export const createCategorySlice: StateCreator<
       // Finish the category bootstrap transaction before reading dots so a
       // stale tab cannot overwrite newer votes with an older dots snapshot.
       const categories = await initializeDefaultCategoriesAtomic(
-        DEFAULT_CATEGORIES.map(({ title, color }) =>
-          prepareNewCategoryInput(title, color),
-        ),
+        DEFAULT_CATEGORIES.map(({ title, color, sortOrder }) => ({
+          ...prepareNewCategoryInput(title, color),
+          sortOrder,
+        })),
       )
 
       set({
