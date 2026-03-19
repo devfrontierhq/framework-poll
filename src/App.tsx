@@ -1,59 +1,154 @@
+import { useEffect, useState } from 'react'
+import { useShallow } from 'zustand/react/shallow'
+import { Unlock, Plus } from 'lucide-react'
+
+import { useDotBoardStore } from '@/store/dotBoardStore'
+import {
+  selectCategoryList,
+  selectDotsByCategory,
+  selectCategoryCount,
+} from '@/store/selectors'
+
 import { Button } from '@/components/ui/button'
 
-function App() {
-  return (
-    <main className="min-h-screen bg-linear-to-br from-slate-950 via-cyan-950 to-emerald-950 px-6 py-16 text-white">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10">
-        <section className="rounded-3xl border border-white/15 bg-white/10 p-8 shadow-2xl shadow-cyan-950/30 backdrop-blur">
-          <div className="mb-6 inline-flex rounded-full border border-cyan-300/40 bg-cyan-300/10 px-3 py-1 text-sm font-semibold tracking-[0.2em] text-cyan-100 uppercase">
-            Tailwind Check
-          </div>
-          <h1 className="max-w-3xl text-5xl font-black tracking-tight text-balance sm:text-6xl">
-            Framework Poll is rendering with Tailwind CSS.
-          </h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-200">
-            This page intentionally uses gradients, transparency, spacing,
-            responsive typography, and grid utilities so style failures are
-            obvious immediately.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-4">
-            <Button className="rounded-full bg-cyan-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-400/30 hover:bg-cyan-200">
-              Primary Action
-            </Button>
-            <Button
-              variant="outline"
-              className="rounded-full border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15"
-            >
-              Secondary Action
-            </Button>
-          </div>
-        </section>
+import { EmptyState } from '@/components/EmptyState'
+import { CategoryGrid } from '@/components/CategoryGrid'
+import { AdminUnlockDialog } from '@/components/AdminUnlockDialog'
+import { CategoryDialog } from '@/components/CategoryDialog'
+import { ExportCsvButton } from '@/components/ExportCsvButton'
 
-        <section className="grid gap-4 md:grid-cols-3">
-          <article className="rounded-2xl bg-amber-300 p-6 text-slate-950 shadow-lg">
-            <p className="text-sm font-semibold tracking-[0.2em] uppercase">
-              Color
-            </p>
-            <p className="mt-3 text-2xl font-black">
-              Solid utility backgrounds
-            </p>
-          </article>
-          <article className="rounded-2xl bg-fuchsia-500 p-6 text-white shadow-lg">
-            <p className="text-sm font-semibold tracking-[0.2em] uppercase">
-              Layout
-            </p>
-            <p className="mt-3 text-2xl font-black">Responsive grid columns</p>
-          </article>
-          <article className="rounded-2xl border border-emerald-200/30 bg-emerald-400/20 p-6 text-white shadow-lg">
-            <p className="text-sm font-semibold tracking-[0.2em] uppercase">
-              Effects
-            </p>
-            <p className="mt-3 text-2xl font-black">
-              Blur, opacity, and shadows
-            </p>
-          </article>
-        </section>
+function App() {
+  const [activeDialog, setActiveDialog] = useState<
+    'unlock' | 'addCategory' | null
+  >(null)
+
+  const loadData = useDotBoardStore((state) => state.loadData)
+  const lockAdmin = useDotBoardStore((state) => state.lockAdmin)
+
+  const categoryCount = useDotBoardStore(selectCategoryCount)
+  const categoryList = useDotBoardStore(selectCategoryList)
+  const dotsByCategory = useDotBoardStore(selectDotsByCategory)
+
+  const { isInitialized, isLoading, loadError, isAdminUnlocked } =
+    useDotBoardStore(
+      useShallow((state) => ({
+        isInitialized: state.isInitialized,
+        isLoading: state.isLoading,
+        loadError: state.loadError,
+        isAdminUnlocked: state.isAdminUnlocked,
+      })),
+    )
+
+  const closeDialog = () => setActiveDialog(null)
+
+  const handleAddCategoryClick = () => setActiveDialog('addCategory')
+  const handleUnlockClick = () => setActiveDialog('unlock')
+
+  const handleLockClick = () => {
+    lockAdmin()
+    closeDialog()
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  function renderContent() {
+    if (isLoading || (!isInitialized && !loadError)) {
+      return (
+        <div className="flex min-h-[400px] items-center justify-center rounded-2xl border border-slate-200 bg-white/50 p-12 text-center text-slate-600 shadow-sm backdrop-blur-sm">
+          載入中...
+        </div>
+      )
+    }
+
+    if (loadError) {
+      return (
+        <div
+          className="flex min-h-[400px] items-center justify-center rounded-2xl border border-rose-200 bg-rose-50/80 p-12 text-center text-rose-700 shadow-sm"
+          role="alert"
+        >
+          載入資料失敗：{loadError}
+        </div>
+      )
+    }
+
+    if (categoryCount === 0) {
+      return <EmptyState />
+    }
+
+    return (
+      <CategoryGrid categories={categoryList} dotsByCategory={dotsByCategory} />
+    )
+  }
+
+  return (
+    <main className="h-screen bg-slate-50">
+      {isAdminUnlocked && (
+        <div className="relative flex h-12 items-center justify-center bg-amber-50 px-6 text-sm font-medium text-amber-900">
+          <span>管理模式已啟用</span>
+          <Button
+            onClick={handleLockClick}
+            variant="outline"
+            size="sm"
+            className="absolute right-6"
+          >
+            退出
+          </Button>
+        </div>
+      )}
+
+      <div
+        className={`mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16 ${
+          isAdminUnlocked ? 'h-[calc(100vh-3rem)]' : 'h-full'
+        }`}
+      >
+        <header className="text-center">
+          <div className="flex flex-col items-center gap-6 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-4">
+            <div className="hidden sm:block" />
+            <div className="w-full sm:max-w-none">
+              <h1 className="text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
+                Framework Poll
+              </h1>
+              <p className="mt-4 text-lg text-slate-700">
+                快來登記你使用的框架
+              </p>
+            </div>
+            <div className="flex w-full justify-center gap-2 sm:justify-end">
+              {isAdminUnlocked ? (
+                <>
+                  <ExportCsvButton />
+                  <Button
+                    onClick={handleAddCategoryClick}
+                    variant="default"
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4" />
+                    新增版塊
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={handleUnlockClick} variant="outline" size="sm">
+                  <Unlock className="h-4 w-4" />
+                  管理模式
+                </Button>
+              )}
+            </div>
+          </div>
+        </header>
+
+        <div className="flex-1">{renderContent()}</div>
       </div>
+
+      <AdminUnlockDialog
+        open={activeDialog === 'unlock'}
+        onOpenChange={(open) => !open && closeDialog()}
+      />
+      <CategoryDialog
+        mode="add"
+        open={activeDialog === 'addCategory'}
+        onOpenChange={(open) => !open && closeDialog()}
+      />
     </main>
   )
 }

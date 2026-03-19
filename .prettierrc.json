@@ -2,5 +2,11 @@
   "semi": false,
   "singleQuote": true,
   "trailingComma": "all",
-  "plugins": ["prettier-plugin-tailwindcss"]
+  "printWidth": 120,
+  "plugins": [
+    "prettier-plugin-tailwindcss",
+    "prettier-plugin-classnames",
+    "prettier-plugin-merge"
+  ],
+  "customFunctions": ["cn", "clsx", "cva"]
 }
