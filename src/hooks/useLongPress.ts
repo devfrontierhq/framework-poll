@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
+
+import { useMountEffect } from './useMountEffect'
 
 type UseLongPressOptions = {
   onLongPress: () => void
@@ -76,13 +78,13 @@ export function useLongPress({
     onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
   }
 
-  useEffect(() => {
+  useMountEffect(() => {
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current)
       }
     }
-  }, [])
+  })
 
   return { handlers, isPressed, didLongPress, clearLongPress }
 }
