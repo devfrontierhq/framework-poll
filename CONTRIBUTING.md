@@ -22,7 +22,7 @@ pnpm dev
 
 ## 開發流程
 
-本專案採用 **Spectra**，規格放在 `openspec/specs/`，變更提案放在 `openspec/changes/`。
+本專案採用 **Spectra**，已完成規格放在 `openspec/specs/`，變更提案放在 `openspec/changes/`。
 
 ### 流程概要
 

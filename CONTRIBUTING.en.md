@@ -38,7 +38,7 @@ discuss? → propose → apply ⇄ ingest → archive
 | `ingest`  | Requirements changed mid-work? Sync the change, then resume `apply` |
 | `archive` | Implementation done and merged                                      |
 
-Specs live in `openspec/specs/`, change proposals in `openspec/changes/`.
+Completed specs live in `openspec/specs/`, change proposals in `openspec/changes/`.
 
 ## Commits
 
