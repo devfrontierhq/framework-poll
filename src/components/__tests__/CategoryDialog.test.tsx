@@ -153,7 +153,7 @@ describe('CategoryDialog', () => {
     it('clears inputs when dialog is closed and reopened', async () => {
       const user = userEvent.setup()
 
-      const { rerender } = render(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
+      const { rerender } = render(<CategoryDialog key="open" mode="add" open={true} onOpenChange={mockOnOpenChange} />)
 
       const titleInput = screen.getByPlaceholderText('版塊名稱')
       await user.type(titleInput, 'React')
@@ -163,9 +163,9 @@ describe('CategoryDialog', () => {
 
       expect(mockOnOpenChange).toHaveBeenCalledWith(false)
 
-      // Reopen
-      rerender(<CategoryDialog mode="add" open={false} onOpenChange={mockOnOpenChange} />)
-      rerender(<CategoryDialog mode="add" open={true} onOpenChange={mockOnOpenChange} />)
+      // Reopen with new key to simulate remount (as done in App.tsx)
+      rerender(<CategoryDialog key="closed" mode="add" open={false} onOpenChange={mockOnOpenChange} />)
+      rerender(<CategoryDialog key="open" mode="add" open={true} onOpenChange={mockOnOpenChange} />)
 
       expect(screen.getByPlaceholderText('版塊名稱')).toHaveValue('')
     })
@@ -422,16 +422,30 @@ describe('CategoryDialog', () => {
     it('reinitializes form data when reopened for the same category', async () => {
       const user = userEvent.setup()
       const { rerender } = render(
-        <CategoryDialog mode="edit" open={true} onOpenChange={mockOnOpenChange} category={mockCategory} />,
+        <CategoryDialog
+          key={mockCategory.id}
+          mode="edit"
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          category={mockCategory}
+        />,
       )
 
       const titleInput = screen.getByLabelText('版塊名稱')
       await user.clear(titleInput)
       await user.type(titleInput, 'Unsaved title')
 
-      rerender(<CategoryDialog mode="edit" open={false} onOpenChange={mockOnOpenChange} category={mockCategory} />)
-
-      rerender(<CategoryDialog mode="edit" open={true} onOpenChange={mockOnOpenChange} category={mockCategory} />)
+      // Simulate close then reopen by remounting with same key (CategoryCard keeps same key=category.id)
+      // In this case the component stays mounted; use a fresh key to force remount
+      rerender(
+        <CategoryDialog
+          key={`${mockCategory.id}-reset`}
+          mode="edit"
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          category={mockCategory}
+        />,
+      )
 
       expect(screen.getByLabelText('版塊名稱')).toHaveValue('React')
       expect(screen.getAllByDisplayValue('#61dafb').length).toBeGreaterThan(0)

@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react'
+import { useId, useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -63,8 +63,8 @@ export function CategoryDialog(props: CategoryDialogProps) {
 
   // Edit mode: single form state
   const [formData, setFormData] = useState({
-    title: '',
-    color: DEFAULT_CATEGORY_COLOR,
+    title: editCategoryTitle ?? '',
+    color: editCategoryColor ?? DEFAULT_CATEGORY_COLOR,
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -163,22 +163,6 @@ export function CategoryDialog(props: CategoryDialogProps) {
   const handleRowChange = (id: string, field: 'title' | 'color', value: string) => {
     setRows((prev) => prev.map((row) => (row.id === id ? { ...row, [field]: value } : row)))
   }
-
-  useEffect(() => {
-    if (!open) return
-
-    if (mode === 'add') {
-      setRows([createDefaultRow()])
-      return
-    }
-
-    if (editCategoryTitle !== undefined && editCategoryColor !== undefined) {
-      setFormData({
-        title: editCategoryTitle,
-        color: editCategoryColor,
-      })
-    }
-  }, [open, mode, editCategoryTitle, editCategoryColor])
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

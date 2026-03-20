@@ -241,7 +241,13 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
         <DeleteDotDialog open={openDialog === 'delete-dot'} onOpenChange={handleDialogChange} dot={selectedDot} />
       )}
 
-      <CategoryDialog mode="edit" open={openDialog === 'edit'} onOpenChange={handleDialogChange} category={category} />
+      <CategoryDialog
+        key={category.id}
+        mode="edit"
+        open={openDialog === 'edit'}
+        onOpenChange={handleDialogChange}
+        category={category}
+      />
       <DeleteCategoryDialog
         open={openDialog === 'delete-category'}
         onOpenChange={handleDialogChange}

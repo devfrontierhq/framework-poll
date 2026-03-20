@@ -127,6 +127,7 @@ function App() {
 
       <AdminUnlockDialog open={activeDialog === 'unlock'} onOpenChange={(open) => !open && closeDialog()} />
       <CategoryDialog
+        key={activeDialog === 'addCategory' ? 'open' : 'closed'}
         mode="add"
         open={activeDialog === 'addCategory'}
         onOpenChange={(open) => !open && closeDialog()}
