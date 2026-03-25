@@ -1,3 +1,5 @@
+import { forwardRef, useImperativeHandle, useRef } from 'react'
+
 import type { Category, Dot } from '@/types/dotBoard'
 import { cn } from '@/lib/utils'
 import { CategoryCard } from './CategoryCard'
@@ -7,8 +9,26 @@ type CategoryGridProps = {
   dotsByCategory: Map<string, Dot[]>
 }
 
-export function CategoryGrid({ categories, dotsByCategory }: CategoryGridProps) {
+export type CategoryGridHandle = {
+  getCardRects: () => Map<string, DOMRect>
+}
+
+export const CategoryGrid = forwardRef<CategoryGridHandle, CategoryGridProps>(function CategoryGrid(
+  { categories, dotsByCategory },
+  ref,
+) {
   const hasOverflowRows = categories.length > 3
+  const cardRefsMap = useRef<Map<string, HTMLDivElement>>(new Map())
+
+  useImperativeHandle(ref, () => ({
+    getCardRects() {
+      const rects = new Map<string, DOMRect>()
+      cardRefsMap.current.forEach((el, categoryId) => {
+        rects.set(categoryId, el.getBoundingClientRect())
+      })
+      return rects
+    },
+  }))
 
   return (
     <div data-testid="category-grid-viewport" className={cn('h-full', hasOverflowRows && 'md:overflow-y-auto')}>
@@ -18,10 +38,20 @@ export function CategoryGrid({ categories, dotsByCategory }: CategoryGridProps) 
       >
         {categories.map((category) => (
           <div key={category.id} className={cn('md:min-w-0', hasOverflowRows ? 'md:aspect-square' : 'h-full')}>
-            <CategoryCard category={category} categoryDots={dotsByCategory.get(category.id) ?? []} />
+            <CategoryCard
+              ref={(el) => {
+                if (el) {
+                  cardRefsMap.current.set(category.id, el)
+                } else {
+                  cardRefsMap.current.delete(category.id)
+                }
+              }}
+              category={category}
+              categoryDots={dotsByCategory.get(category.id) ?? []}
+            />
           </div>
         ))}
       </div>
     </div>
   )
-}
+})

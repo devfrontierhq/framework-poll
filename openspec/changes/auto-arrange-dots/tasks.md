@@ -15,8 +15,8 @@
 
 ## 4. Ref 串接
 
-- [ ] 4.1 將 `CategoryCard` 改為 `forwardRef<HTMLDivElement, CategoryCardProps>`，ref 掛在點點區域 div（`relative flex-1 cursor-pointer p-4`）（讀取板塊容器尺寸：`useImperativeHandle`）
-- [ ] 4.2 將 `CategoryGrid` 改為 `forwardRef`，用 callback refs 收集各 `CategoryCard` 的點點區域 ref，並用 `useImperativeHandle` expose `getCardRects(): Map<string, DOMRect>`（讀取板塊容器尺寸：`useImperativeHandle`）
+- [x] 4.1 將 `CategoryCard` 改為 `forwardRef<HTMLDivElement, CategoryCardProps>`，ref 掛在點點區域 div（`relative flex-1 cursor-pointer p-4`）（讀取板塊容器尺寸：`useImperativeHandle`）
+- [x] 4.2 將 `CategoryGrid` 改為 `forwardRef`，用 callback refs 收集各 `CategoryCard` 的點點區域 ref，並用 `useImperativeHandle` expose `getCardRects(): Map<string, DOMRect>`（讀取板塊容器尺寸：`useImperativeHandle`）
 
 ## 5. UI 按鈕與整合
 

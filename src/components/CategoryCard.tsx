@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { forwardRef, useRef, useState } from 'react'
 import { Pencil, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -125,7 +125,10 @@ function DotWrapper({ dot, category, isAdminUnlocked, onDotClick }: DotWrapperPr
   )
 }
 
-export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
+export const CategoryCard = forwardRef<HTMLDivElement, CategoryCardProps>(function CategoryCard(
+  { category, categoryDots },
+  ref,
+) {
   const isAdminUnlocked = useDotBoardStore((state) => state.isAdminUnlocked)
   const addDot = useDotBoardStore((state) => state.addDot)
 
@@ -219,7 +222,7 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
       </div>
 
       {/* Dot display area */}
-      <div className="relative flex-1 cursor-pointer p-4" onClick={handleAreaClick}>
+      <div ref={ref} className="relative flex-1 cursor-pointer p-4" onClick={handleAreaClick}>
         {categoryDots.map((dot) => (
           <DotWrapper
             key={dot.id}
@@ -255,4 +258,4 @@ export function CategoryCard({ category, categoryDots }: CategoryCardProps) {
       />
     </div>
   )
-}
+})
