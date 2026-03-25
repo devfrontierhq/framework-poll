@@ -1,10 +1,9 @@
+import type { DotPositionUpdate } from '@/db/dots'
 import type { Category, Dot } from '@/types/dotBoard'
 
 export const ADMIN_REQUIRED_ERROR = 'Admin mode is required'
-export const DELETE_PASSWORD_REQUIRED_ERROR =
-  'Password confirmation is required for delete operations'
-export const INVALID_DELETE_PASSWORD_ERROR =
-  'Invalid password for delete operation'
+export const DELETE_PASSWORD_REQUIRED_ERROR = 'Password confirmation is required for delete operations'
+export const INVALID_DELETE_PASSWORD_ERROR = 'Invalid password for delete operation'
 
 // State types
 export type AuthState = {
@@ -35,25 +34,15 @@ export type AuthActions = {
 
 export type CategoryActions = {
   addCategory: (title: string, color: string) => Promise<Category>
-  editCategory: (
-    categoryId: string,
-    updates: { title?: string; color?: string },
-  ) => Promise<Category | undefined>
-  removeCategory: (
-    categoryId: string,
-    password: string,
-  ) => Promise<Category | undefined>
+  editCategory: (categoryId: string, updates: { title?: string; color?: string }) => Promise<Category | undefined>
+  removeCategory: (categoryId: string, password: string) => Promise<Category | undefined>
   initializeDefaultCategories: () => Promise<void>
 }
 
 export type DotActions = {
-  addDot: (
-    categoryId: string,
-    name: string,
-    xRatio: number,
-    yRatio: number,
-  ) => Promise<Dot>
+  addDot: (categoryId: string, name: string, xRatio: number, yRatio: number) => Promise<Dot>
   removeDot: (dotId: string, password: string) => Promise<Dot | undefined>
+  arrangeDots: (updates: DotPositionUpdate[]) => Promise<void>
 }
 
 export type DataActions = {

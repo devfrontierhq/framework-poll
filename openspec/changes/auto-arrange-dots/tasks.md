@@ -5,8 +5,8 @@
 
 ## 2. Store 層
 
-- [ ] 2.1 在 `src/store/types.ts` 的 `DotActions` 新增 `arrangeDots` action 型別
-- [ ] 2.2 在 `src/store/slices/dotSlice.ts` 實作 `arrangeDots`：guard `isAdminUnlocked`、呼叫 `batchUpdateDots`、單次 `set` 更新 Zustand state
+- [x] 2.1 在 `src/store/types.ts` 的 `DotActions` 新增 `arrangeDots` action 型別
+- [x] 2.2 在 `src/store/slices/dotSlice.ts` 實作 `arrangeDots`：guard `isAdminUnlocked`、呼叫 `batchUpdateDots`、單次 `set` 更新 Zustand state
 
 ## 3. 排列演算法
 
