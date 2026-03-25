@@ -4,12 +4,7 @@ import { createId } from '@/utils/id'
 
 import { getDb } from '@/db/client'
 import { DotBoardDataError } from '@/db/errors'
-import {
-  INDEX_NAMES,
-  STORE_NAMES,
-  type CreateDotInput,
-  type UpdateDotInput,
-} from '@/db/schema'
+import { INDEX_NAMES, STORE_NAMES, type CreateDotInput, type UpdateDotInput } from '@/db/schema'
 import { getTimestamp, omitUndefinedFields, withDbError } from '@/db/utils'
 
 export async function createDot(input: CreateDotInput): Promise<Dot> {
@@ -21,26 +16,19 @@ export async function createDot(input: CreateDotInput): Promise<Dot> {
 
   return withDbError('create dot', async () => {
     const database = await getDb()
-    const transaction = database.transaction(
-      [STORE_NAMES.categories, STORE_NAMES.dots],
-      'readwrite',
-    )
+    const transaction = database.transaction([STORE_NAMES.categories, STORE_NAMES.dots], 'readwrite')
     const categoriesStore = transaction.objectStore(STORE_NAMES.categories)
     const dotsStore = transaction.objectStore(STORE_NAMES.dots)
     const category = await categoriesStore.get(input.categoryId)
 
     if (!category) {
       await transaction.done
-      throw new DotBoardDataError(
-        `Cannot create dot: category with id "${input.categoryId}" does not exist.`,
-      )
+      throw new DotBoardDataError(`Cannot create dot: category with id "${input.categoryId}" does not exist.`)
     }
 
     if (category.isDeleted === 1) {
       await transaction.done
-      throw new DotBoardDataError(
-        `Cannot create dot: category "${category.title}" has been deleted.`,
-      )
+      throw new DotBoardDataError(`Cannot create dot: category "${category.title}" has been deleted.`)
     }
 
     const dot: Dot = {
@@ -82,11 +70,7 @@ export async function getActiveDotsByCategory(categoryId: Dot['categoryId']) {
   const database = await getDb()
 
   return withDbError('read active dots by category', () =>
-    database.getAllFromIndex(
-      STORE_NAMES.dots,
-      INDEX_NAMES.dots.categoryIdIsDeleted,
-      [categoryId, 0],
-    ),
+    database.getAllFromIndex(STORE_NAMES.dots, INDEX_NAMES.dots.categoryIdIsDeleted, [categoryId, 0]),
   )
 }
 
@@ -113,10 +97,7 @@ export async function updateDot(dotId: Dot['id'], updates: UpdateDotInput) {
       ...sanitizedUpdates,
     }
 
-    if (
-      sanitizedUpdates.xRatio !== undefined ||
-      sanitizedUpdates.yRatio !== undefined
-    ) {
+    if (sanitizedUpdates.xRatio !== undefined || sanitizedUpdates.yRatio !== undefined) {
       if (!isValidCoordinates(nextDot.xRatio, nextDot.yRatio)) {
         throw new DotBoardDataError(
           `Invalid dot coordinates: xRatio=${nextDot.xRatio}, yRatio=${nextDot.yRatio}. Both must be in [0, 1].`,
@@ -128,6 +109,43 @@ export async function updateDot(dotId: Dot['id'], updates: UpdateDotInput) {
     await transaction.done
 
     return nextDot
+  })
+}
+
+export type DotPositionUpdate = {
+  id: Dot['id']
+  xRatio: number
+  yRatio: number
+}
+
+export async function batchUpdateDots(updates: DotPositionUpdate[]): Promise<Dot[]> {
+  if (updates.length === 0) return []
+
+  for (const update of updates) {
+    if (!isValidCoordinates(update.xRatio, update.yRatio)) {
+      throw new DotBoardDataError(
+        `Invalid dot coordinates: xRatio=${update.xRatio}, yRatio=${update.yRatio}. Both must be in [0, 1].`,
+      )
+    }
+  }
+
+  return withDbError('batch update dots', async () => {
+    const database = await getDb()
+    const transaction = database.transaction(STORE_NAMES.dots, 'readwrite')
+    const dotsStore = transaction.objectStore(STORE_NAMES.dots)
+    const updated: Dot[] = []
+
+    for (const update of updates) {
+      const dot = await dotsStore.get(update.id)
+      if (!dot || dot.isDeleted === 1) continue
+
+      const nextDot: Dot = { ...dot, xRatio: update.xRatio, yRatio: update.yRatio }
+      await dotsStore.put(nextDot)
+      updated.push(nextDot)
+    }
+
+    await transaction.done
+    return updated
   })
 }
 

@@ -1,6 +1,6 @@
 ## 1. DB 層
 
-- [ ] 1.1 在 `src/db/dots.ts` 新增 `DotPositionUpdate` type 與 `batchUpdateDots` 函式，實作批次更新：單一 IndexedDB transaction（批次更新：單一 IndexedDB transaction）、空陣列 no-op、先驗證座標後開 transaction、略過已刪除點點（batch update dot positions）
+- [x] 1.1 在 `src/db/dots.ts` 新增 `DotPositionUpdate` type 與 `batchUpdateDots` 函式，實作批次更新：單一 IndexedDB transaction（批次更新：單一 IndexedDB transaction）、空陣列 no-op、先驗證座標後開 transaction、略過已刪除點點（batch update dot positions）
 - [ ] 1.2 為 `batchUpdateDots` 補充單元測試：空陣列、成功更新、略過 soft-deleted、無效座標拋錯（batch update rejects invalid coordinates、empty batch is a no-op、batch update skips deleted dots）
 
 ## 2. Store 層
