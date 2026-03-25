@@ -20,6 +20,6 @@
 
 ## 5. UI 按鈕與整合
 
-- [ ] 5.1 在 `App.tsx` 新增 `categoryGridRef`、`isArranging` state 與 `handleArrangeDots` handler：讀取所有板塊 DOMRect、呼叫 `computeGridLayout`、呼叫 `arrangeDots` store action（auto-arrange requires admin mode、persist arrangement to database）
-- [ ] 5.2 在管理員工具列新增「排列整齊」按鈕（`Grid2X2` icon），`disabled={isArranging}`，點擊觸發 `handleArrangeDots`（admin mode UI state、admin mode shows controls、auto-arrange all dots）
+- [x] 5.1 在 `App.tsx` 新增 `categoryGridRef`、`isArranging` state 與 `handleArrangeDots` handler：讀取所有板塊 DOMRect、呼叫 `computeGridLayout`、呼叫 `arrangeDots` store action（auto-arrange requires admin mode、persist arrangement to database）
+- [x] 5.2 在管理員工具列新增「排列整齊」按鈕（`Grid2X2` icon），`disabled={isArranging}`，點擊觸發 `handleArrangeDots`（admin mode UI state、admin mode shows controls、auto-arrange all dots）
 - [ ] 5.3 手動驗證：點擊「整齊排列」後點點整齊排列、reload 後位置保留（positions visible after reload）、各板塊點點數不同時各自正確排列、非管理員看不到按鈕（auto-arrange requires admin mode）
