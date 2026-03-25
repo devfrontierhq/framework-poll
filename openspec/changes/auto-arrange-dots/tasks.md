@@ -10,7 +10,7 @@
 
 ## 3. 排列演算法
 
-- [ ] 3.1 建立 `src/utils/arrangeDotsLayout.ts`，實作純函式 `computeGridLayout(dots, width, height)`：排列演算法：動態網格，按 `createdAt` 升序排序、grid layout with dynamic spacing
+- [x] 3.1 建立 `src/utils/arrangeDotsLayout.ts`，實作純函式 `computeGridLayout(dots, width, height)`：排列演算法：動態網格，按 `createdAt` 升序排序、grid layout with dynamic spacing
 - [ ] 3.2 為 `computeGridLayout` 新增單元測試：0 顆點回傳空陣列、1 顆點落在左上角（single dot arrangement）、N 顆點所有 ratio 在 [0, 1]（dots fill available space）、間距不足時自動增加 cols（dynamic spacing when dots are too dense）、排序正確
 
 ## 4. Ref 串接
