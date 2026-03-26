@@ -108,3 +108,57 @@ The system SHALL render dots with their category's color.
 - **THEN** the dot MUST use the color defined in its parent category
 - **WHEN** the category color changes
 - **THEN** all dots in that category MUST update to the new color
+
+## Requirements
+
+### Requirement: Batch update dot positions
+
+The system SHALL support updating multiple dot positions in a single atomic database operation.
+
+#### Scenario: Batch update succeeds
+
+- **WHEN** the system receives an array of dot position updates (id, xRatio, yRatio)
+- **THEN** the system SHALL validate all coordinates are in [0, 1] before writing
+- **THEN** the system SHALL update all valid dots within a single IndexedDB transaction
+- **THEN** the system SHALL return the updated dot objects
+
+#### Scenario: Batch update skips deleted dots
+
+- **WHEN** a batch update includes a dot id that has been soft-deleted
+- **THEN** the system SHALL skip that dot silently
+- **THEN** the system SHALL continue updating remaining valid dots
+
+#### Scenario: Batch update rejects invalid coordinates
+
+- **WHEN** any coordinate in the batch has xRatio or yRatio outside [0, 1]
+- **THEN** the system SHALL throw a validation error before opening the database transaction
+- **THEN** no dots SHALL be updated
+
+#### Scenario: Empty batch is a no-op
+
+- **WHEN** the system receives an empty array of updates
+- **THEN** the system SHALL return an empty array without touching the database
+
+<!-- @trace
+source: auto-arrange-dots
+updated: 2026-03-26
+code:
+  - test/store.ts
+  - CONTRIBUTING.md
+  - CONTRIBUTING.en.md
+  - src/components/CategoryCard.tsx
+  - src/store/slices/dotSlice.ts
+  - .kilocode/skills/spectra-propose/SKILL.md
+  - src/store/types.ts
+  - .agents/skills/spectra-propose/SKILL.md
+  - .kilocode/workflows/spectra-propose.md
+  - src/main.tsx
+  - src/db/dots.ts
+  - src/App.tsx
+  - src/components/CategoryGrid.tsx
+  - src/utils/arrangeDotsLayout.ts
+tests:
+  - src/__tests__/App.test.tsx
+  - src/utils/__tests__/arrangeDotsLayout.test.ts
+  - src/db/__tests__/dots.test.ts
+-->

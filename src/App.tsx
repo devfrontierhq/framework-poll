@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-import { Unlock, Plus } from 'lucide-react'
+import { Unlock, Plus, Grid2X2 } from 'lucide-react'
 
 import { useMountEffect } from '@/hooks/useMountEffect'
 import { useDotBoardStore } from '@/store/dotBoardStore'
@@ -9,16 +9,20 @@ import { selectCategoryList, selectDotsByCategory, selectCategoryCount } from '@
 import { Button } from '@/components/ui/button'
 
 import { EmptyState } from '@/components/EmptyState'
-import { CategoryGrid } from '@/components/CategoryGrid'
+import { CategoryGrid, type CategoryGridHandle } from '@/components/CategoryGrid'
 import { AdminUnlockDialog } from '@/components/AdminUnlockDialog'
 import { CategoryDialog } from '@/components/CategoryDialog'
 import { ExportCsvButton } from '@/components/ExportCsvButton'
+import { computeGridLayout } from '@/utils/arrangeDotsLayout'
 
 function App() {
   const [activeDialog, setActiveDialog] = useState<'unlock' | 'addCategory' | null>(null)
+  const [isArranging, setIsArranging] = useState(false)
+  const categoryGridRef = useRef<CategoryGridHandle>(null)
 
   const loadData = useDotBoardStore((state) => state.loadData)
   const lockAdmin = useDotBoardStore((state) => state.lockAdmin)
+  const arrangeDots = useDotBoardStore((state) => state.arrangeDots)
 
   const categoryCount = useDotBoardStore(selectCategoryCount)
   const categoryList = useDotBoardStore(selectCategoryList)
@@ -41,6 +45,23 @@ function App() {
   const handleLockClick = () => {
     lockAdmin()
     closeDialog()
+  }
+
+  const handleArrangeDots = async () => {
+    if (!categoryGridRef.current) return
+    setIsArranging(true)
+    try {
+      const rects = categoryGridRef.current.getCardRects()
+      const updates = categoryList.flatMap((category) => {
+        const rect = rects.get(category.id)
+        if (!rect) return []
+        const dots = dotsByCategory.get(category.id) ?? []
+        return computeGridLayout(dots, rect.width, rect.height)
+      })
+      await arrangeDots(updates)
+    } finally {
+      setIsArranging(false)
+    }
   }
 
   useMountEffect(() => {
@@ -75,7 +96,7 @@ function App() {
       return <EmptyState />
     }
 
-    return <CategoryGrid categories={categoryList} dotsByCategory={dotsByCategory} />
+    return <CategoryGrid ref={categoryGridRef} categories={categoryList} dotsByCategory={dotsByCategory} />
   }
 
   return (
@@ -107,6 +128,10 @@ function App() {
               {isAdminUnlocked ? (
                 <>
                   <ExportCsvButton />
+                  <Button onClick={handleArrangeDots} disabled={isArranging} variant="outline" size="sm">
+                    <Grid2X2 className="h-4 w-4" />
+                    排列整齊
+                  </Button>
                   <Button onClick={handleAddCategoryClick} variant="default" size="sm">
                     <Plus className="h-4 w-4" />
                     新增版塊

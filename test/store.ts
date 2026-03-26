@@ -2,9 +2,7 @@ import { vi } from 'vitest'
 
 import type { DotBoardStore } from '@/store/types'
 
-export function createMockDotBoardStore(
-  overrides: Partial<DotBoardStore> = {},
-): DotBoardStore {
+export function createMockDotBoardStore(overrides: Partial<DotBoardStore> = {}): DotBoardStore {
   return {
     categories: new Map(),
     isSeedingDefaultCategories: false,
@@ -22,6 +20,7 @@ export function createMockDotBoardStore(
     initializeDefaultCategories: vi.fn(),
     addDot: vi.fn(),
     removeDot: vi.fn(),
+    arrangeDots: vi.fn(),
     loadData: vi.fn(),
     exportCsv: vi.fn(),
     ...overrides,

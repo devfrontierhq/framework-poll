@@ -34,6 +34,31 @@ The system SHALL maintain admin mode as a UI state, not a separate page.
 - **THEN** the system disables admin mode
 - **THEN** the system hides all admin controls
 
+
+<!-- @trace
+source: auto-arrange-dots
+updated: 2026-03-26
+code:
+  - test/store.ts
+  - CONTRIBUTING.md
+  - CONTRIBUTING.en.md
+  - src/components/CategoryCard.tsx
+  - src/store/slices/dotSlice.ts
+  - .kilocode/skills/spectra-propose/SKILL.md
+  - src/store/types.ts
+  - .agents/skills/spectra-propose/SKILL.md
+  - .kilocode/workflows/spectra-propose.md
+  - src/main.tsx
+  - src/db/dots.ts
+  - src/App.tsx
+  - src/components/CategoryGrid.tsx
+  - src/utils/arrangeDotsLayout.ts
+tests:
+  - src/__tests__/App.test.tsx
+  - src/utils/__tests__/arrangeDotsLayout.test.ts
+  - src/db/__tests__/dots.test.ts
+-->
+
 ### Requirement: Password storage
 
 The system MUST store the admin password in environment variable VITE_ADMIN_SECRET.
@@ -104,3 +129,5 @@ The system SHALL restrict certain operations to admin mode only.
 #### Scenario: Non-admin cannot delete dots
 - **WHEN** a non-admin user clicks on a dot
 - **THEN** the system SHALL NOT display the delete dialog
+
+## Requirements
