@@ -8,22 +8,15 @@ import {
   type DotState,
   type DotActions,
 } from '../types'
-import { createDot, softDeleteDot } from '@/db'
+import { batchUpdateDots, createDot, softDeleteDot } from '@/db'
+import type { DotPositionUpdate } from '@/db/dots'
 
 export type DotSlice = DotState & DotActions
 
-export const createDotSlice: StateCreator<DotBoardStore, [], [], DotSlice> = (
-  set,
-  get,
-) => ({
+export const createDotSlice: StateCreator<DotBoardStore, [], [], DotSlice> = (set, get) => ({
   dots: new Map(),
 
-  addDot: async (
-    categoryId: string,
-    name: string,
-    xRatio: number,
-    yRatio: number,
-  ) => {
+  addDot: async (categoryId: string, name: string, xRatio: number, yRatio: number) => {
     const dot = await createDot({ categoryId, name, xRatio, yRatio })
 
     set((state) => ({
@@ -61,5 +54,21 @@ export const createDotSlice: StateCreator<DotBoardStore, [], [], DotSlice> = (
     }
 
     return deletedDot
+  },
+
+  arrangeDots: async (updates: DotPositionUpdate[]) => {
+    if (!get().isAdminUnlocked) {
+      throw new Error(ADMIN_REQUIRED_ERROR)
+    }
+
+    const updatedDots = await batchUpdateDots(updates)
+
+    set((state) => {
+      const dots = new Map(state.dots)
+      for (const dot of updatedDots) {
+        dots.set(dot.id, dot)
+      }
+      return { dots }
+    })
   },
 })

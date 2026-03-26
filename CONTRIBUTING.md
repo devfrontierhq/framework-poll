@@ -108,6 +108,24 @@ pnpm test:watch
 pnpm test:report
 ```
 
+### 手動視覺測試（排列整齊）
+
+在 dev 環境下，`window.__store__` 會暴露 Zustand store，可在 DevTools Console 快速塞入測試資料。
+
+先建立板塊後，在 DevTools Console 執行以下腳本為每個板塊塞入 500 個隨機位置的點點：
+
+```js
+const store = window.__store__.getState()
+const categories = [...store.categories.values()]
+for (const cat of categories) {
+  for (let i = 0; i < 500; i++) {
+    store.addDot(cat.id, `測試${i}`, Math.random(), Math.random())
+  }
+}
+```
+
+執行後解鎖管理模式，再按「排列整齊」觀察視覺效果。
+
 ## 專案結構
 
 ```

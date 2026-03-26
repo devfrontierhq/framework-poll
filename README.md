@@ -87,3 +87,7 @@ src/
 ## 貢獻
 
 詳見 [貢獻指南](CONTRIBUTING.md)。
+
+## 版本資訊
+
+- 變更紀錄：[CHANGELOG.md](./CHANGELOG.md)
