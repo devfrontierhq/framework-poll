@@ -171,4 +171,49 @@ describe('computeGridLayout', () => {
 
     expect(result.map((r) => r.id)).toEqual(['dot-a', 'dot-b', 'dot-c'])
   })
+
+  it('500 dots in realistic card size — all ratios within [0, 1]', () => {
+    const dots = Array.from({ length: 500 }, (_, i) =>
+      buildDot({
+        id: `dot-${i}`,
+        createdAt: new Date(2024, 0, 1, 0, 0, i).toISOString(),
+        xRatio: Math.random(),
+        yRatio: Math.random(),
+      }),
+    )
+
+    const width = 400
+    const height = 300
+    const result = computeGridLayout(dots, width, height)
+
+    expect(result.length).toBeLessThanOrEqual(500)
+    for (const { xRatio, yRatio } of result) {
+      expect(xRatio).toBeGreaterThanOrEqual(0)
+      expect(xRatio).toBeLessThanOrEqual(1)
+      expect(yRatio).toBeGreaterThanOrEqual(0)
+      expect(yRatio).toBeLessThanOrEqual(1)
+    }
+  })
+
+  it('500 dots compressed layout — dot centers do not exceed container bounds in pixels', () => {
+    const dots = Array.from({ length: 500 }, (_, i) =>
+      buildDot({
+        id: `dot-${i}`,
+        createdAt: new Date(2024, 0, 1, 0, 0, i).toISOString(),
+        xRatio: Math.random(),
+        yRatio: Math.random(),
+      }),
+    )
+
+    const width = 400
+    const height = 300
+    const result = computeGridLayout(dots, width, height)
+
+    for (const { xRatio, yRatio } of result) {
+      expect(xRatio * width).toBeGreaterThanOrEqual(0)
+      expect(xRatio * width).toBeLessThanOrEqual(width)
+      expect(yRatio * height).toBeGreaterThanOrEqual(0)
+      expect(yRatio * height).toBeLessThanOrEqual(height)
+    }
+  })
 })
