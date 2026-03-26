@@ -24,7 +24,15 @@ export const CategoryGrid = forwardRef<CategoryGridHandle, CategoryGridProps>(fu
     getCardRects() {
       const rects = new Map<string, DOMRect>()
       cardRefsMap.current.forEach((el, categoryId) => {
-        rects.set(categoryId, el.getBoundingClientRect())
+        const style = getComputedStyle(el)
+        const paddingX = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0)
+        const paddingY = (parseFloat(style.paddingTop) || 0) + (parseFloat(style.paddingBottom) || 0)
+        const borderBox = el.getBoundingClientRect()
+        rects.set(categoryId, {
+          ...borderBox,
+          width: borderBox.width - paddingX,
+          height: borderBox.height - paddingY,
+        } as DOMRect)
       })
       return rects
     },
@@ -34,7 +42,11 @@ export const CategoryGrid = forwardRef<CategoryGridHandle, CategoryGridProps>(fu
     <div data-testid="category-grid-viewport" className={cn('h-full', hasOverflowRows && 'md:overflow-y-auto')}>
       <div
         data-testid="category-grid-track"
-        className={cn('flex h-full min-w-full flex-col gap-6', 'md:grid md:grid-cols-3', hasOverflowRows && 'md:pb-10')}
+        className={cn(
+          'flex h-full min-w-full flex-col gap-6 overflow-x-hidden',
+          'md:grid md:grid-cols-3',
+          hasOverflowRows && 'md:pb-10',
+        )}
       >
         {categories.map((category) => (
           <div key={category.id} className={cn('md:min-w-0', hasOverflowRows ? 'md:aspect-square' : 'h-full')}>

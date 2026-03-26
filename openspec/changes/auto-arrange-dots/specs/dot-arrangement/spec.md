@@ -27,11 +27,17 @@ The system SHALL arrange dots in a grid that fits within the category container.
 - **THEN** dots SHALL fill the first row completely before wrapping to the next row
 - **THEN** all dot positions SHALL have xRatio and yRatio in [0, 1]
 
+> **Design note**: `containerWidth` and `containerHeight` MUST be measured as the content-box of the dot area element (i.e., `getBoundingClientRect()` minus CSS padding). Although dots are rendered as percentages of the full padding-box, `DOT_PADDING` (6 px) keeps arranged dots visually within the padded region. Passing the full padding-box to `computeGridLayout` would cause arranged dots to extend into the card's CSS padding area.
+>
+> This means auto-arrange and manual dot placement use different coordinate spaces: manual placement computes xRatio/yRatio against the full padding-box (via `handleAreaClick`), while auto-arrange computes them against the content-box. The resulting ~5% scale difference is accepted as a known trade-off — it is not a bug.
+
 #### Scenario: Container too small to fit all dots
 
 - **WHEN** the container cannot fit all dots at minimum density (DOT_DIAMETER spacing, no gap)
 - **THEN** the system SHALL arrange as many dots as possible within the container
 - **THEN** dots that cannot fit SHALL remain at their current positions
+
+> **Design note**: Overflow dots MUST be left at their existing positions, not wrapped using modulo arithmetic (`i % capacity`). Wrapping would assign identical coordinates to multiple dots, causing them to visually stack on top of each other. Leaving overflow dots in place is the correct and intentional behavior.
 
 #### Scenario: Single dot arrangement
 

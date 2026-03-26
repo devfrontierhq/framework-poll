@@ -76,22 +76,36 @@ describe('computeGridLayout', () => {
     expect(result[3].yRatio).toBeCloseTo(36 / height)
   })
 
-  it('overflow: only arranges dots that fit — no out-of-range ratios', () => {
+  it('overflow: all dots get valid in-bounds positions — no out-of-range ratios', () => {
     const dots = Array.from({ length: 100 }, (_, i) =>
       buildDot({ id: `dot-${i}`, createdAt: `2024-01-${String(i + 1).padStart(2, '0')}T00:00:00.000Z` }),
     )
 
     // 60x60: usableW/H = 48, maxCols = floor(48/12) = 4, maxRows = 4, capacity = 16 < 100
-    // Only the first 16 dots should be returned, all within [0, 1]
+    // All 100 dots are returned; overflow dots wrap via modulo to valid grid positions
     const result = computeGridLayout(dots, 60, 60)
 
-    expect(result.length).toBeLessThan(dots.length)
+    expect(result.length).toBe(dots.length)
     for (const { xRatio, yRatio } of result) {
       expect(xRatio).toBeGreaterThanOrEqual(0)
       expect(xRatio).toBeLessThanOrEqual(1)
       expect(yRatio).toBeGreaterThanOrEqual(0)
       expect(yRatio).toBeLessThanOrEqual(1)
     }
+  })
+
+  it('overflow: modulo wrapping — overflow dots stack on valid grid positions', () => {
+    const dots = Array.from({ length: 100 }, (_, i) =>
+      buildDot({ id: `dot-${i}`, createdAt: `2024-01-${String(i + 1).padStart(2, '0')}T00:00:00.000Z` }),
+    )
+
+    // 60x60: capacity=16, dots 16-99 wrap back to same positions as dots 0-15
+    const result = computeGridLayout(dots, 60, 60)
+
+    expect(result.length).toBe(100)
+    // dot[16] should have the same position as dot[0]
+    expect(result[16].xRatio).toBeCloseTo(result[0].xRatio)
+    expect(result[16].yRatio).toBeCloseTo(result[0].yRatio)
   })
 
   it('no premature compression — 40 dots in 300x100 use normalStep without entering fallback', () => {
@@ -186,7 +200,7 @@ describe('computeGridLayout', () => {
     const height = 300
     const result = computeGridLayout(dots, width, height)
 
-    expect(result.length).toBeLessThanOrEqual(500)
+    expect(result.length).toBe(500)
     for (const { xRatio, yRatio } of result) {
       expect(xRatio).toBeGreaterThanOrEqual(0)
       expect(xRatio).toBeLessThanOrEqual(1)

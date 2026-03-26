@@ -52,9 +52,12 @@ export function computeGridLayout(dots: Dot[], width: number, height: number): D
   const { cols, step, capacity } = resolveGrid(sorted.length, usableW, usableH)
   const origin = DOT_PADDING_PX + DOT_DIAMETER_PX / 2
 
-  return sorted.slice(0, capacity).map((dot, i) => ({
-    id: dot.id,
-    xRatio: (origin + (i % cols) * step) / width,
-    yRatio: (origin + Math.floor(i / cols) * step) / height,
-  }))
+  return sorted.map((dot, i) => {
+    const idx = i % capacity
+    return {
+      id: dot.id,
+      xRatio: (origin + (idx % cols) * step) / width,
+      yRatio: (origin + Math.floor(idx / cols) * step) / height,
+    }
+  })
 }
