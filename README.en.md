@@ -84,3 +84,7 @@ pnpm dev
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, workflow, and code style.
+
+## Release
+
+- Changelog: [CHANGELOG.en.md](./CHANGELOG.en.md)
